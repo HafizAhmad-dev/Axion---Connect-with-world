@@ -8,7 +8,7 @@ const Layout = () => {
   <Header />
 
   {/* Main grows but can shrink and scroll */}
-  <main className="flex-1  bg-[#8021df]">
+  <main className="flex-1 overflow-hidden scrollbar-hide bg-[#8021df]">
     <Outlet />
   </main>
 
