@@ -1,0 +1,9 @@
+@font-face {
+    font-family: HeadingFont;
+    src: url('../src//assets/fonts//GoogleSans-Regular.ttf');
+}
+@import "tailwindcss";
+
+@theme{
+    --font-hfont: 'HeadingFont';
+}

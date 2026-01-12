@@ -1,0 +1,23 @@
+import  { Outlet } from 'react-router'
+import Header from './Header'
+import Navbar from './Navbar'
+const Layout = () => {
+  return (
+ <div className="h-screen w-screen flex flex-col">
+  {/* Header with fixed height */}
+  <Header />
+
+  {/* Main grows but can shrink and scroll */}
+  <main className="flex-1  bg-[#8021df]">
+    <Outlet />
+  </main>
+
+  {/* Navbar with fixed height */}
+  <Navbar />
+</div>
+
+
+  )
+}
+
+export default Layout
