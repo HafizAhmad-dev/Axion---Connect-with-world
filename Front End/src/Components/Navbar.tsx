@@ -2,17 +2,25 @@ import { useState } from "react";
 import { LuUserPlus } from "react-icons/lu";
 import { MessageCircle } from 'lucide-react';
 import { Clock4 } from 'lucide-react';
+import { useNavigate } from "react-router";
 
 type tabs = 'chats' | 'moments' | 'requests';
 
 const Navbar = () => {
     const [activeTab, setActiveTab] = useState<tabs>('chats');
+    const navigate = useNavigate();
     return (
         <nav className=" py-2 bg-white  ">
             {/* list containing all elements */}
             <ul className="flex justify-around">
                 {/* //chat tab */}
-                <li className={`flex justify-center items-center flex-col  px-4 py-2  rounded-xl ${activeTab === 'chats' ? 'bg-[#F1F6FF]' : ''}`} onClick={() => setActiveTab('chats')}>
+                <li 
+                    className={`flex justify-center items-center flex-col  px-4 py-2  rounded-xl ${activeTab === 'chats' ? 'bg-[#F1F6FF]' : ''}`} 
+                    onClick={() => {
+                        setActiveTab('chats');
+                        navigate('/');
+                    }}
+                    >
                     <span className="icon">
                         <MessageCircle size={24}
                             strokeWidth={1.5}
@@ -26,7 +34,10 @@ const Navbar = () => {
                 {/* //moments tab */}
                 <li
                     className={`flex justify-center items-center flex-col px-4 py-2  rounded-xl ${activeTab === 'moments' ? 'bg-[#FBF4FD]' : ''}`}
-                    onClick={() => setActiveTab('moments')}
+                    onClick={() => {
+                        setActiveTab('moments');
+                        navigate('/moments');
+                    }}
                 >
                     <span className="icon">
                         <Clock4 size={24} strokeWidth={1.5} color={activeTab === 'moments' ? '#9810FA' : '#6B7280'} fill={activeTab === 'moments' ? '#9810FA' : 'transparent'} />
@@ -39,7 +50,10 @@ const Navbar = () => {
                 {/* //requests tab */}
                 <li
                     className={`flex justify-center items-center flex-col  px-4 py-2  rounded-xl ${activeTab === 'requests' ? 'bg-[#E0F7F8]' : ''}`}
-                    onClick={() => setActiveTab('requests')}>
+                    onClick={() => {
+                         setActiveTab('requests');
+                            navigate('/requests');
+                    }}>
                     <span className="icon">
                         <LuUserPlus size={24} strokeWidth={1.5} color={activeTab === 'requests' ? '#4D72FF' : '#6B7280'} fill={activeTab === 'requests' ? '#4D72FF' : 'transparent'} />
                     </span>

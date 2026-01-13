@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
-import { mockContacts } from './Users';
+import { mockContacts } from '../Components/Users';
+import PhotoHolder from '../Components/PhotoHolder';
 
 const Home = () => {
     return (
@@ -18,7 +19,7 @@ const Home = () => {
                     <div key={user.id} className="User flex justify-between px-2 py-2 hover:shadow-usercard rounded-xl ">
                         {/* //div with image and main content */}
                         <div className='flex items-center gap-2'>
-                            <div className="image rounded-full h-10 w-10 bg-linear-to-br from-[#887FFF] to-[#a44cfd]"></div>
+                            <PhotoHolder css='h-11 w-11' />
                             <div className="main">
                                 <h2 className='font-semibold'>{user.name}</h2>
                                 <p className='text-sm text-gray-500'>{user.lastMessage}</p>
