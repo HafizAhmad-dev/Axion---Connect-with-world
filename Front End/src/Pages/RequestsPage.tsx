@@ -1,4 +1,3 @@
-import React from 'react'
 import RequestBox from '../Components/RequestBox'
 import {requests} from '../Components/MockRequests'
 
