@@ -1,8 +1,8 @@
 import { Routes, Route } from 'react-router';
 import Layout from './Components/Layout';
 import Home from './Pages/Conversations';
-import Moments from './Pages/Moments';
 import RequestsPage from './Pages/RequestsPage';
+import Highlight from './Pages/Highlights';
 
 const App = () => {
   return (
@@ -10,7 +10,7 @@ const App = () => {
       <Routes>
         <Route element={<Layout />}>
           <Route path='/' element={<Home />} />
-          <Route path='/moments' element={<Moments />} />
+          <Route path='/highlights' element={<Highlight />} />
           <Route path='/requests' element={<RequestsPage />} />
         </Route>
       </Routes>

@@ -2,7 +2,7 @@ import { Search } from 'lucide-react';
 import { mockContacts } from '../Components/Users';
 import PhotoHolder from '../Components/PhotoHolder';
 
-const Home = () => {
+const   Home = () => {
     return (
         <div className='bg-home pb-10 h-full pt-3 px-3'>
             <div className="search border flex items-center px-2 py-1 gap-4 rounded-lg border-gray-300 shadow-sm ">

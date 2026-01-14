@@ -9,6 +9,7 @@
   --font-hfont: 'HeadingFont';
   --color-home: #F9FBFC;
   --color-inactiveicon: #6B7280;
+  --color-highlight-section: #F5F7FB;
   --shadow-usercard: rgba(0, 0, 0, 0.15) 0px 6px 12px -3px,
     rgba(0, 0, 0, 0.1) 0px 2px 4px -1px;
   --shadow-requestscard: rgba(14, 63, 126, 0.08) 0px 0px 0px 1px,rgba(42, 51, 70, 0.09) 0px 2px 3px -1px,rgba(42, 51, 70, 0.12) 0px 6px 8px -2px, rgba(14, 63, 126, 0.10) 0px 14px 18px -6px;
