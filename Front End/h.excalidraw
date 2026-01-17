@@ -1,0 +1,51 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://marketplace.visualstudio.com/items?itemName=pomdtr.excalidraw-editor",
+  "elements": [
+    {
+      "id": "3XBo3M8iyiQLFH1Mz9Idd",
+      "type": "text",
+      "x": 242,
+      "y": 99,
+      "width": 162,
+      "height": 125,
+      "angle": 0,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "transparent",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "strokeStyle": "solid",
+      "roughness": 1,
+      "opacity": 100,
+      "groupIds": [],
+      "frameId": null,
+      "index": "a0",
+      "roundness": null,
+      "seed": 1772657970,
+      "version": 115,
+      "versionNonce": 1121122286,
+      "isDeleted": false,
+      "boundElements": null,
+      "updated": 1768663461280,
+      "link": null,
+      "locked": false,
+      "text": "Redux States\n\n1. User, \n2. Contacts,\n3. Highlights",
+      "fontSize": 20,
+      "fontFamily": 5,
+      "textAlign": "left",
+      "verticalAlign": "top",
+      "containerId": null,
+      "originalText": "Redux States\n\n1. User, \n2. Contacts,\n3. Highlights",
+      "autoResize": false,
+      "lineHeight": 1.25
+    }
+  ],
+  "appState": {
+    "gridSize": 20,
+    "gridStep": 5,
+    "gridModeEnabled": false,
+    "viewBackgroundColor": "#ffffff"
+  },
+  "files": {}
+}

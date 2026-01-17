@@ -1,157 +1,152 @@
-  interface Status {
+export interface Highlight {
   id: string;
   content: string;
   timestamp: string;
-  backgroundColor: string;
+  backgroundColor: string; // tailwind classes
 }
 
- interface Highlight {
+export interface HighlightDataStructure {
   id: string;
   user: string;
   avatar: string;
   seen: boolean;
   time: string;
-  statuses: Status[];
+  highlight: Highlight[];
 }
 
-// For the full object with dynamic keys
- type HighlightsDataType = Record<string, Highlight>;
+const HighlightsData: HighlightDataStructure[] = [
+  {
+    id: 'highlight_sarah',
+    user: 'Sarah Chen',
+    avatar: 'SC',
+    seen: false,
+    time: '2 hours ago',
+    highlight: [
+      {
+        id: 'sarah_1',
+        content: '✨ Just finished an amazing project with the team! Feeling grateful! 🎉',
+        timestamp: '2 hours ago',
+        backgroundColor: 'bg-gradient-to-br from-indigo-500 to-purple-600',
+      },
+      {
+        id: 'sarah_2',
+        content: 'The future belongs to those who believe in the beauty of their dreams 💫',
+        timestamp: '3 hours ago',
+        backgroundColor: 'bg-gradient-to-br from-pink-400 to-rose-500',
+      },
+      {
+        id: 'sarah_3',
+        content: 'Coffee and creativity - the perfect combination! ☕️',
+        timestamp: '4 hours ago',
+        backgroundColor: 'bg-gradient-to-br from-sky-400 to-cyan-400',
+      },
+    ],
+  },
+  {
+    id: 'highlight_marcus',
+    user: 'Marcus Rodriguez',
+    avatar: 'MR',
+    seen: false,
+    time: '5 hours ago',
+    highlight: [
+      {
+        id: 'marcus_1',
+        content: 'Beautiful sunset today 🌅 Taking a moment to appreciate the little things',
+        timestamp: '5 hours ago',
+        backgroundColor: 'bg-gradient-to-br from-pink-500 to-yellow-400',
+      },
+      {
+        id: 'marcus_2',
+        content: 'Life is short, make every moment count! 💪',
+        timestamp: '6 hours ago',
+        backgroundColor: 'bg-gradient-to-br from-teal-400 to-indigo-900',
+      },
+    ],
+  },
+  {
+    id: 'highlight_emily',
+    user: 'Emily Watson',
+    avatar: 'EW',
+    seen: false,
+    time: '8 hours ago',
+    highlight: [
+      {
+        id: 'emily_1',
+        content: 'Working hard on something amazing! Stay tuned 🚀',
+        timestamp: '8 hours ago',
+        backgroundColor: 'bg-gradient-to-br from-emerald-200 to-pink-200',
+      },
+    ],
+  },
+  {
+    id: 'highlight_david',
+    user: 'David Kim',
+    avatar: 'DK',
+    seen: false,
+    time: 'Yesterday',
+    highlight: [
+      {
+        id: 'david_1',
+        content: 'Great day at the beach! 🏖️',
+        timestamp: 'Yesterday at 3:45 PM',
+        backgroundColor: 'bg-gradient-to-br from-sky-900 to-teal-300',
+      },
+      {
+        id: 'david_2',
+        content: 'Sunset vibes 🌅',
+        timestamp: 'Yesterday at 7:20 PM',
+        backgroundColor: 'bg-gradient-to-br from-rose-300 to-pink-100',
+      },
+      {
+        id: 'david_3',
+        content: 'Perfect end to a perfect day ✨',
+        timestamp: 'Yesterday at 9:15 PM',
+        backgroundColor: 'bg-gradient-to-br from-neutral-700 to-black',
+      },
+      {
+        id: 'david_4',
+        content: 'Grateful for moments like these 🙏',
+        timestamp: 'Yesterday at 10:00 PM',
+        backgroundColor: 'bg-gradient-to-br from-rose-500 to-sky-200',
+      },
+    ],
+  },
+  {
+    id: 'highlight_lisa',
+    user: 'Lisa Anderson',
+    avatar: 'LA',
+    seen: false,
+    time: 'Yesterday',
+    highlight: [
+      {
+        id: 'lisa_1',
+        content: 'New adventures await! 🌟',
+        timestamp: 'Yesterday at 11:30 AM',
+        backgroundColor: 'bg-gradient-to-br from-blue-300 to-sky-200',
+      },
+      {
+        id: 'lisa_2',
+        content: 'Making memories that will last forever 📸',
+        timestamp: 'Yesterday at 2:15 PM',
+        backgroundColor: 'bg-gradient-to-br from-amber-100 to-orange-300',
+      },
+    ],
+  },
+  {
+    id: 'highlight_james',
+    user: 'James Taylor',
+    avatar: 'JT',
+    seen: false,
+    time: 'Yesterday',
+    highlight: [
+      {
+        id: 'james_1',
+        content: 'Chase your dreams, not your fears! 💭',
+        timestamp: 'Yesterday at 5:00 PM',
+        backgroundColor: 'bg-gradient-to-br from-purple-300 to-yellow-100',
+      },
+    ],
+  },
+];
 
- const HighlightsData:HighlightsDataType = {
-    '1': {
-      id: '1',
-      user: 'Sarah Chen',
-      seen:false,
-      avatar: 'SC',
-      time: '2 hours ago',
-      statuses: [
-        {
-          id: 's1',
-          content: '✨ Just finished an amazing project with the team! Feeling grateful! 🎉',
-          timestamp: '2 hours ago',
-          backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        },
-        {
-          id: 's2',
-          content: 'The future belongs to those who believe in the beauty of their dreams 💫',
-          timestamp: '3 hours ago',
-          backgroundColor: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-        },
-        {
-          id: 's3',
-          content: 'Coffee and creativity - the perfect combination! ☕️',
-          timestamp: '4 hours ago',
-          backgroundColor: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-        },
-      ],
-    },
-    '2': {
-      id: '2',
-      user: 'Marcus Rodriguez',
-      avatar: 'MR',
-      seen:false,
-
-      time: '5 hours ago',
-      statuses: [
-        {
-          id: 's4',
-          content: 'Beautiful sunset today 🌅 Taking a moment to appreciate the little things',
-          timestamp: '5 hours ago',
-          backgroundColor: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-        },
-        {
-          id: 's5',
-          content: 'Life is short, make every moment count! 💪',
-          timestamp: '6 hours ago',
-          backgroundColor: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
-        },
-      ],
-    },
-    '3': {
-      id: '3',
-      user: 'Emily Watson',
-      avatar: 'EW',
-      seen:false,
-
-      time: '8 hours ago',
-      statuses: [
-        {
-          id: 's6',
-          content: 'Working hard on something amazing! Stay tuned 🚀',
-          timestamp: '8 hours ago',
-          backgroundColor: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-        },
-      ],
-    },
-    '4': {
-      id: '4',
-      user: 'David Kim',
-      avatar: 'DK',
-      seen:true,
-      time: 'Yesterday',
-      statuses: [
-        {
-          id: 's7',
-          content: 'Great day at the beach! 🏖️',
-          timestamp: 'Yesterday at 3:45 PM',
-          backgroundColor: 'linear-gradient(135deg, #13547a 0%, #80d0c7 100%)',
-        },
-        {
-          id: 's8',
-          content: 'Sunset vibes 🌅',
-          timestamp: 'Yesterday at 7:20 PM',
-          backgroundColor: 'linear-gradient(135deg, #ee9ca7 0%, #ffdde1 100%)',
-        },
-        {
-          id: 's9',
-          content: 'Perfect end to a perfect day ✨',
-          timestamp: 'Yesterday at 9:15 PM',
-          backgroundColor: 'linear-gradient(135deg, #434343 0%, #000000 100%)',
-        },
-        {
-          id: 's10',
-          content: 'Grateful for moments like these 🙏',
-          timestamp: 'Yesterday at 10:00 PM',
-          backgroundColor: 'linear-gradient(135deg, #ff6e7f 0%, #bfe9ff 100%)',
-        },
-      ],
-    },
-    '5': {
-      id: '5',
-      user: 'Lisa Anderson',
-      avatar: 'LA',
-      seen:true,
-      time: 'Yesterday',
-      statuses: [
-        {
-          id: 's11',
-          content: 'New adventures await! 🌟',
-          timestamp: 'Yesterday at 11:30 AM',
-          backgroundColor: 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
-        },
-        {
-          id: 's12',
-          content: 'Making memories that will last forever 📸',
-          timestamp: 'Yesterday at 2:15 PM',
-          backgroundColor: 'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
-        },
-      ],
-    },
-    '6': {
-      id: '6',
-      user: 'James Taylor',
-      avatar: 'JT',
-      seen:true,
-      time: 'Yesterday',
-      statuses: [
-        {
-          id: 's13',
-          content: 'Chase your dreams, not your fears! 💭',
-          timestamp: 'Yesterday at 5:00 PM',
-          backgroundColor: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
-        },
-      ],
-    },
-  };
-
-export default HighlightsData
+export default HighlightsData;
