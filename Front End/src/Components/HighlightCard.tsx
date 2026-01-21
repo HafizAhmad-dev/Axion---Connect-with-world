@@ -26,7 +26,7 @@ const HighlightCard = React.memo((data: Props) => {
                 <div className="avatar relative ">
                     <PhotoHolder css='h-12 w-12' />
                     {/* //highlist count circle */}
-                    {data.statusCount >= 2 && <div className='highlightCount absolute h-5 w-5 right-0 bottom-0 rounded-full bg-[#9810FA] border border-gray-300 flex justify-center items-center text-[12px] text-white' >{data.statusCount}</div>}
+                    {data.statusCount > 0 && <div className='highlightCount absolute h-5 w-5 right-0 bottom-0 rounded-full bg-[#9810FA] border border-gray-300 flex justify-center items-center text-[12px] text-white' >{data.statusCount}</div>}
                 </div>
                 <div className='flex flex-col'>
                     <h2 className='font-semibold'>{data.name}</h2>

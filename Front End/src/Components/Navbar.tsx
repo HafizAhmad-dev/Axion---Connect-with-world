@@ -48,7 +48,7 @@ const Navbar = () => {
                     className={`flex justify-center items-center flex-col px-4 py-2  rounded-xl ${activeTab === 'highlights' ? 'bg-[#FBF4FD]' : ''}`}
                     onClick={() => {
                         setActiveTab('highlights');
-                        navigate('/highlights');
+                        navigate('/user/highlights');
                     }}
                 >
                     <span className="icon">
@@ -64,7 +64,7 @@ const Navbar = () => {
                     className={`flex justify-center items-center flex-col  px-4 py-2  rounded-xl ${activeTab === 'requests' ? 'bg-[#E0F7F8]' : ''}`}
                     onClick={() => {
                         setActiveTab('requests');
-                        navigate('/requests');
+                        navigate('/user/requests');
                     }}>
                     <span className="icon">
                         <LuUserPlus size={24} strokeWidth={1.5} color={activeTab === 'requests' ? '#4D72FF' : '#6B7280'} fill={activeTab === 'requests' ? '#4D72FF' : 'transparent'} />

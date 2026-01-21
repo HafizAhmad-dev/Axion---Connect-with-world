@@ -6,7 +6,7 @@ import type { RootState } from "../Store/store"
 const Highlight = () => {
   // Get the highlights array from the Redux store
   const HighlightsData = useSelector((state: RootState) => state.highlights.highlights);
-
+ 
 
 
   return (

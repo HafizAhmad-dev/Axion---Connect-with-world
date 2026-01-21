@@ -1,6 +1,6 @@
 import  { Outlet } from 'react-router'
-import Header from './Header'
-import Navbar from './Navbar'
+import Header from '../Components/Header'
+import Navbar from '../Components/Navbar'
 const Layout = () => {
   return (
  <div className="h-screen w-screen flex flex-col">
