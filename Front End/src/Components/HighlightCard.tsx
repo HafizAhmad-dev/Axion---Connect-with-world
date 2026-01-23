@@ -20,7 +20,7 @@ const HighlightCard = React.memo((data: Props) => {
 
     return (
         <>  
-            {showHighlight && <HighLightView highlightsId={data.id} onComplete={() => setShowHighlight(false)} />}
+            {showHighlight && <HighLightView highlightsId={data.id} owner='other' onComplete={() => setShowHighlight(false)} />}
 
             <div className='flex gap-5 px-1 py-1 mt-4 hover:bg-white' onClick={changeHighlight}>
                 <div className="avatar relative ">

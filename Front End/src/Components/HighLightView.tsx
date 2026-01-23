@@ -1,21 +1,37 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../Store/store";
 import { markAsSeen } from "../Store/Slices/HighlightsSlice";
 
 interface HighLightViewProps {
   highlightsId: string;
+  owner: "self" | "other";
   onComplete: () => void;
 }
 
-const HighLightView = ({ highlightsId, onComplete }: HighLightViewProps) => {
+const HighLightView = ({ highlightsId, onComplete, owner }: HighLightViewProps) => {
   const dispatch = useDispatch();
-  // Get the highlights for this user from the Redux store
-  const userHighlights = useSelector((state: RootState) =>
+
+  // Select highlights from Redux store
+  const selfHighlights = useSelector((state: RootState) => state.user.highlights);
+  const otherHighlights = useSelector((state: RootState) =>
     state.highlights.highlights.find(hg => hg.id === highlightsId)
   );
 
-  const highlights = userHighlights?.highlight || []; // array of individual highlights
+  // Memoize the final object to prevent new references each render
+  const userHighlights = useMemo(() => {
+    if (owner === "self") {
+      return {
+        id: 'self',
+        user: "You",
+        highlight: selfHighlights
+      };
+    }
+    return otherHighlights ?? null;
+  }, [owner, selfHighlights, otherHighlights]);
+
+  // Extract highlights array safely
+  const highlights = userHighlights?.highlight || [];
 
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -57,19 +73,18 @@ const HighLightView = ({ highlightsId, onComplete }: HighLightViewProps) => {
 
     return () => cancelAnimationFrame(frameRef.current);
   }, [paused, index, highlights]);
+
   const nextHighlight = () => {
     if (index === highlights.length - 1) {
-      // last highlight: defer side effects
       setTimeout(() => {
-        dispatch(markAsSeen(highlightsId));
-          onComplete();
+        dispatch(markAsSeen(userHighlights?.id || highlightsId));
+        onComplete();
       }, 0);
 
-      setProgress(100); // optionally fill bar completely
-      return;           // do not increment index
+      setProgress(100);
+      return;
     }
 
-    // move to next highlight
     setIndex(prev => prev + 1);
     setProgress(0);
   };
@@ -85,13 +100,19 @@ const HighLightView = ({ highlightsId, onComplete }: HighLightViewProps) => {
 
     if (x < rect.width / 3) prevHighlight();
     else if (x > (2 * rect.width) / 3) nextHighlight();
-    else setProgress(0); // middle click resets progress
+    else setProgress(0);
   };
 
+  if (!userHighlights) return null; // nothing to show
+
+  useEffect(() => {
+    console.log(userHighlights)
+  }, [userHighlights]);
 
   return (
     <div
-      className={`fixed inset-0 z-10 flex flex-col justify-center items-center ${highlights[index]?.backgroundColor ?? ''} bg-cover bg-center`}
+      className={`fixed inset-0 z-99 flex flex-col justify-center items-center ${highlights[index]?.backgroundColor ?? ''} bg-cover bg-center`}
+      style={{ background: highlights[index].backgroundColor }}
       onClick={handleClick}
       onPointerDown={() => setPaused(true)}
       onPointerUp={() => setPaused(false)}
@@ -110,13 +131,13 @@ const HighLightView = ({ highlightsId, onComplete }: HighLightViewProps) => {
       </div>
 
       {/* Highlight content */}
-      <p className="text-white text-center text-3xl font-semibold drop-shadow-lg px-4">
+      <p className="text-white text-center text-3xl font-semibold drop-shadow-lg px-4 max-w-[90%] wrap-break-word">
         {highlights[index]?.content}
       </p>
 
       {/* Username at bottom */}
       <p className="absolute bottom-8 text-white text-lg font-medium drop-shadow-md">
-        {userHighlights!.user}
+        {userHighlights.user}
       </p>
     </div>
   );
