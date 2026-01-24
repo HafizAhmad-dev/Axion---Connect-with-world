@@ -6,6 +6,7 @@ frontend/.env
 frontend/.env.local
 frontend/.env.*.local
 frontend/.excalidraw
+
 # Logs
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
