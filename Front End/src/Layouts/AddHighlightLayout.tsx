@@ -50,6 +50,7 @@ const AddHighlightLayout = () => {
       {/* Header */}
       <header className="flex justify-between px-5 py-5 bg-linear-to-r from-purple-500 to-pink-600">
         <h2 className="text-lg font-bold text-white">Add Highlight</h2>
+        
         <button
           className="hover:bg-white/20 rounded-full w-7 h-7 flex justify-center items-center"
           onClick={handleClose}
