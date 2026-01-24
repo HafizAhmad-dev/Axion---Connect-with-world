@@ -2,7 +2,7 @@
 const AddImageHg = () => {
   return (
     <div>
-      AddImage
+      <input type="file" accept="image/*" />
     </div>
   )
 }

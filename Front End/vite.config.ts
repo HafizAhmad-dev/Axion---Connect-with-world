@@ -16,8 +16,8 @@ export default defineConfig({
         short_name: "Axion",
         start_url: "/",
         display: "standalone",
-        background_color: "#000000",
-        theme_color: "#000000",
+        background_color: "#fff",
+        theme_color: "#fff",
         icons: [
           {
             src: "/axion5.png",
