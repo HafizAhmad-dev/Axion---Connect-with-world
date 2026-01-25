@@ -36,7 +36,7 @@ const highlightMap: Record<BtnTitles, React.ReactNode> = {
 };
 
 const AddHighlightSection = () => {
-  const [highlightType, setHighlightType] = useState<BtnTitles>('text');
+  const [highlightType, setHighlightType] = useState<BtnTitles>('image');
 
   return (
     <section className='flex flex-col h-full'>
