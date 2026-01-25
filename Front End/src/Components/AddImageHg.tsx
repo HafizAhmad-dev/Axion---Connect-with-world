@@ -1,6 +1,6 @@
 import { Camera } from "lucide-react";
-import { useRef, useState, type ChangeEvent, type ReactHTMLElement } from "react"
-
+import { useRef, useState, type ChangeEvent } from "react"
+import { useEffect } from "react";
 
 const AddImageHg = () => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -17,6 +17,11 @@ const AddImageHg = () => {
   function handleClick() {
     inputRef.current?.click();
   }
+  useEffect(() => {
+    console.log(file)
+
+
+  }, [file])
 
   return (
     <div className="px-5 py-5 flex flex-col justify-center text-center">
