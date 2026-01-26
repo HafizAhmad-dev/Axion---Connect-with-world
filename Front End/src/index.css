@@ -51,3 +51,23 @@
     /* Firefox */
   }
 }
+
+.placeholder-center:empty:before {
+  content: attr(data-placeholder);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: gray;
+  pointer-events: none;
+}
+
+.placeholder-top-left:empty:before {
+  content: attr(data-placeholder);
+  position: absolute;
+  left: 0.5rem;   /* padding from left */
+  top: 0.5rem;    /* padding from top */
+  transform: none;
+  color: gray;
+  pointer-events: none;
+}

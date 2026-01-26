@@ -24,23 +24,28 @@ export const backgroundPresets = [
 ];
 
 const AddHighlightLayout = () => {
-  const dispatch = useDispatch(); 
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // State lifted to layout
   const [text, setText] = useState<string>("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
   const [bgColor, setBgColor] = useState<string>(backgroundPresets[0]);
 
   const handleClose = () => navigate(-1);
 
   const handleShare = () => {
-    if (!text.trim()) return; // prevent empty highlight
+    if (!text.trim() && !imageFile) return; // prevent empty highlight
+
     const newHighlight: Highlight = {
       id: Date.now().toString(),
-      content:text,
-      backgroundColor:bgColor,
+      type: imageFile ? "image" : "text",
+      content: text || undefined,
+      imageFile: imageFile || undefined,
+      backgroundColor: bgColor,
       timestamp: new Date().toISOString(),
     };
+
     dispatch(addHighlight(newHighlight));
     navigate(-1);
   };
@@ -50,7 +55,7 @@ const AddHighlightLayout = () => {
       {/* Header */}
       <header className="flex justify-between px-5 py-5 bg-linear-to-r from-purple-500 to-pink-600">
         <h2 className="text-lg font-bold text-white">Add Highlight</h2>
-        
+
         <button
           className="hover:bg-white/20 rounded-full w-7 h-7 flex justify-center items-center"
           onClick={handleClose}
@@ -59,9 +64,9 @@ const AddHighlightLayout = () => {
         </button>
       </header>
 
-      {/* Outlet - pass state via props */}
+      {/* Outlet - pass state via context */}
       <main className="flex-1">
-        <Outlet context={{ text, setText, bgColor, setBgColor,backgroundPresets }} />
+        <Outlet context={{ text, setText, imageFile, setImageFile, bgColor, setBgColor, backgroundPresets }} />
       </main>
 
       {/* Footer buttons */}

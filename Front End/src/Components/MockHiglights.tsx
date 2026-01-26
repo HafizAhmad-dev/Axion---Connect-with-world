@@ -1,8 +1,10 @@
 export interface Highlight {
-  id: string;
-  content: string;
+   id: string;
+  type: "text" | "image";       // type of highlight
+  content?: string;             // for text
+  imageFile?: File;             // for image (local file)
   timestamp: string;
-  backgroundColor: string; // tailwind classes
+  backgroundColor?: string;
 }
 
 export interface HighlightDataStructure {
@@ -23,18 +25,21 @@ const HighlightsData: HighlightDataStructure[] = [
     time: '2 hours ago',
     highlight: [
       {
+        type:'text',
         id: 'sarah_1',
         content: '✨ Just finished an amazing project with the team! Feeling grateful! 🎉',
         timestamp: '2 hours ago',
         backgroundColor: 'bg-gradient-to-br from-indigo-500 to-purple-600',
       },
       {
+        type:'text',
         id: 'sarah_2',
         content: 'The future belongs to those who believe in the beauty of their dreams 💫',
         timestamp: '3 hours ago',
         backgroundColor: 'bg-gradient-to-br from-pink-400 to-rose-500',
       },
       {
+        type:'text',
         id: 'sarah_3',
         content: 'Coffee and creativity - the perfect combination! ☕️',
         timestamp: '4 hours ago',
@@ -50,6 +55,7 @@ const HighlightsData: HighlightDataStructure[] = [
     time: '5 hours ago',
     highlight: [
       {
+        type:'text',
         id: 'marcus_1',
         content: 'Beautiful sunset today 🌅 Taking a moment to appreciate the little things',
         timestamp: '5 hours ago',
@@ -58,6 +64,7 @@ const HighlightsData: HighlightDataStructure[] = [
       {
         id: 'marcus_2',
         content: 'Life is short, make every moment count! 💪',
+        type:'text',
         timestamp: '6 hours ago',
         backgroundColor: 'bg-gradient-to-br from-teal-400 to-indigo-900',
       },
@@ -71,6 +78,7 @@ const HighlightsData: HighlightDataStructure[] = [
     time: '8 hours ago',
     highlight: [
       {
+        type:'text',
         id: 'emily_1',
         content: 'Working hard on something amazing! Stay tuned 🚀',
         timestamp: '8 hours ago',
@@ -86,24 +94,28 @@ const HighlightsData: HighlightDataStructure[] = [
     time: 'Yesterday',
     highlight: [
       {
+        type:'text',
         id: 'david_1',
         content: 'Great day at the beach! 🏖️',
         timestamp: 'Yesterday at 3:45 PM',
         backgroundColor: 'bg-gradient-to-br from-sky-900 to-teal-300',
       },
       {
+        type:'text',
         id: 'david_2',
         content: 'Sunset vibes 🌅',
         timestamp: 'Yesterday at 7:20 PM',
         backgroundColor: 'bg-gradient-to-br from-rose-300 to-pink-100',
       },
       {
+        type:'text',
         id: 'david_3',
         content: 'Perfect end to a perfect day ✨',
         timestamp: 'Yesterday at 9:15 PM',
         backgroundColor: 'bg-gradient-to-br from-neutral-700 to-black',
       },
       {
+        type:'text',
         id: 'david_4',
         content: 'Grateful for moments like these 🙏',
         timestamp: 'Yesterday at 10:00 PM',
@@ -119,12 +131,14 @@ const HighlightsData: HighlightDataStructure[] = [
     time: 'Yesterday',
     highlight: [
       {
+        type:'text',
         id: 'lisa_1',
         content: 'New adventures await! 🌟',
         timestamp: 'Yesterday at 11:30 AM',
         backgroundColor: 'bg-gradient-to-br from-blue-300 to-sky-200',
       },
       {
+        type:'text',
         id: 'lisa_2',
         content: 'Making memories that will last forever 📸',
         timestamp: 'Yesterday at 2:15 PM',
@@ -140,6 +154,7 @@ const HighlightsData: HighlightDataStructure[] = [
     time: 'Yesterday',
     highlight: [
       {
+        type:'text',
         id: 'james_1',
         content: 'Chase your dreams, not your fears! 💭',
         timestamp: 'Yesterday at 5:00 PM',
