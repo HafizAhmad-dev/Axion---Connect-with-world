@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { Highlight } from '../../Components/MockHiglights'
+import type { Highlight } from '../../MockData/MockHiglights'
 
 interface UserType {
     id:string;

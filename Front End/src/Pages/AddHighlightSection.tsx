@@ -36,19 +36,19 @@ const highlightMap: Record<BtnTitles, React.ReactNode> = {
 };
 
 const AddHighlightSection = () => {
-  const [highlightType, setHighlightType] = useState<BtnTitles>('image');
+  const [highlightType, setHighlightType] = useState<BtnTitles>('text');
 
   return (
     <section className='flex flex-col h-full'>
       {/* //navbar */}
-      <nav className='flex border-b border-gray-300'>
+      <nav className='flex'>
         {navBtns.map((btn) => (
           <Button key={btn.title} title={btn.title} Icon={btn.Icon} bname={btn.bname} highlightType={highlightType} setType={setHighlightType} />
         ))}
       </nav>
 
       {/* //main content */}
-      <main className='flex-1'>
+      <main className='flex-1 relative'>
         {highlightMap[highlightType]}
       </main>
     </section>
@@ -65,7 +65,7 @@ const Button = (
   return (
     <button
       key={title}
-      className={`  py-3 w-full flex justify-center items-center gap-2 font-semibold ${highlightType === title ? 'border-b border-[#A023FA] text-[#A023FA] bg-[#FAF5FF]' : ' text-gray-500'} transition-colors `}
+      className={`  py-3 w-full flex justify-center items-center gap-2 font-semibold ${highlightType === title ? 'border-b border-[#A023FA] text-[#A023FA] bg-[#FAF5FF]' : ' text-gray-500  border-b border-gray-300'} transition-colors `}
       onClick={() => setType(title)}
     >
       <Icon />

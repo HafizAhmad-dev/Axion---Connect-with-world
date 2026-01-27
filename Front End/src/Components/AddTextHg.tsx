@@ -14,7 +14,7 @@ const AddTextHg = () => {
     useOutletContext<AddTextHgContext>();
 
   return (
-    <div className="h-full w-full flex flex-col items-center py-7">
+    <div className="max-h-full w-full flex flex-col items-center py-5">
       {/* Highlight preview */}
       <div
         className="preview relative flex justify-center items-center w-[90%] h-60 rounded-2xl shadow-md"

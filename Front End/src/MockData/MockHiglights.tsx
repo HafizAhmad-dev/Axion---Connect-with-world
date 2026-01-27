@@ -2,7 +2,7 @@ export interface Highlight {
    id: string;
   type: "text" | "image";       // type of highlight
   content?: string;             // for text
-  imageFile?: File;             // for image (local file)
+  imageUrl?: string;             // for image 
   timestamp: string;
   backgroundColor?: string;
 }

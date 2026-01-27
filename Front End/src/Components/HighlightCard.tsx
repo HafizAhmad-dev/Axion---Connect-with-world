@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PhotoHolder from './PhotoHolder'
 import HighLightView from './HighLightView';
-import type { Highlight } from './MockHiglights';
+import type { Highlight } from '../MockData/MockHiglights';
 
 type Props = {
     id:string;

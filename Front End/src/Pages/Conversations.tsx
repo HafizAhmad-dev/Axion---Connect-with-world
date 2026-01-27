@@ -1,8 +1,25 @@
 import { Search } from 'lucide-react';
-import { mockContacts } from '../Components/Users';
+import { mockContacts } from '../MockData/MockUsers';
 import PhotoHolder from '../Components/PhotoHolder';
+import { useState } from 'react';
+import UnderDev from '../Components/UnderDev';
+import { setChatPartner } from '../Store/Slices/ChatPartner';
+import { useNavigate } from 'react-router';
+import { useDispatch } from 'react-redux';
+const Home = () => {
+    const [showChat,setShowChat] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
-const   Home = () => {
+    function OpenChat(username:string){
+        setShowChat(true);
+        dispatch(setChatPartner(username));
+        navigate('user/chat')
+    }
+
+    if(showChat){
+        return <UnderDev />
+    }
     return (
         <div className='bg-home pb-10 h-full pt-3 px-3'>
             <div className="search border flex items-center px-2 py-1 gap-4 rounded-lg border-gray-300 shadow-sm ">
@@ -16,7 +33,7 @@ const   Home = () => {
 
                 {/* //User Card */}
                 {mockContacts.map((user) => (
-                    <div key={user.id} className="User flex justify-between px-2 py-2 hover:shadow-usercard rounded-xl ">
+                    <div onClick={() => OpenChat(user.name)} key={user.id} className="User flex justify-between px-2 py-2 hover:shadow-usercard rounded-xl ">
                         {/* //div with image and main content */}
                         <div className='flex items-center gap-2'>
                             <PhotoHolder css='h-11 w-11' />

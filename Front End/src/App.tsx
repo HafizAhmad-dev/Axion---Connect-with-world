@@ -5,6 +5,7 @@ import RequestsPage from './Pages/RequestsPage';
 import Highlight from './Pages/Highlights';
 import AddHighlightSection from './Pages/AddHighlightSection';
 import AddHighlightLayout from './Layouts/AddHighlightLayout';
+import ChatLayout from './Pages/ChatLayout';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
        <Route element={<AddHighlightLayout />}>
          <Route path='/user/addHighlights' element={<AddHighlightSection />} />
        </Route>
+       <Route path='/user/chat' element={<ChatLayout/>} />
       </Routes>
     </div>
   )

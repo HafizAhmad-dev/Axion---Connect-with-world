@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { HighlightDataStructure, } from '../../Components/MockHiglights'
-import HighlightsData from '../../Components/MockHiglights'
+import type { HighlightDataStructure, } from '../../MockData/MockHiglights'
+import HighlightsData from '../../MockData/MockHiglights'
 
 interface HighlightsState {
     highlights: HighlightDataStructure[];

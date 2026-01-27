@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { highlightsSlice } from './Slices/HighlightsSlice'
 import { userSlice } from './Slices/UserSlice'
+import { chatPartnerSlice } from './Slices/ChatPartner'
 
 export const store = configureStore({
   reducer: {
     highlights: highlightsSlice.reducer,
-    user:userSlice.reducer
+    user:userSlice.reducer,
+    chatPartner:chatPartnerSlice.reducer
   },
 })
 

@@ -1,5 +1,5 @@
 import RequestBox from '../Components/RequestBox'
-import {requests} from '../Components/MockRequests'
+import {requests} from '../MockData/MockRequests'
 
 type FriendRequest = {
     id:string;

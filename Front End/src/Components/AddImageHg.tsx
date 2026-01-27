@@ -3,10 +3,11 @@ import { useOutletContext } from "react-router";
 import { Camera } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Keyboard, Thumbs } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/thumbs";
+import 'swiper/css';
+
 
 import CustomInput from "./CustomTextInputBox";
+import DevBlock from "./UnderDev";
 
 interface AddImageHgContext {
   text: string;
@@ -16,7 +17,7 @@ interface AddImageHgContext {
 }
 
 const AddImageHg = () => {
-  const { text, setText, imageFile, setImageFile } =
+  const { text, setText, setImageFile } =
     useOutletContext<AddImageHgContext>();
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,7 +52,8 @@ const AddImageHg = () => {
   }, [imagePreviews]);
 
   return (
-    <div className="px-5 py-5 flex flex-col items-center text-center space-y-4 w-full">
+    <div className="px-5 py-5 flex flex-col items-center text-center w-full">
+      <DevBlock />
       <input
         ref={inputRef}
         type="file"

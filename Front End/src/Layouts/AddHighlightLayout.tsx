@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { Outlet, useNavigate } from "react-router";
 import { addHighlight } from "../Store/Slices/UserSlice";
-import type { Highlight } from "../Components/MockHiglights";
+import type { Highlight } from "../MockData/MockHiglights";
 import { useState } from "react";
 
 export const backgroundPresets = [
@@ -38,10 +38,11 @@ const AddHighlightLayout = () => {
     if (!text.trim() && !imageFile) return; // prevent empty highlight
 
     const newHighlight: Highlight = {
+
       id: Date.now().toString(),
       type: imageFile ? "image" : "text",
-      content: text || undefined,
-      imageFile: imageFile || undefined,
+      content: text,
+
       backgroundColor: bgColor,
       timestamp: new Date().toISOString(),
     };
@@ -54,7 +55,7 @@ const AddHighlightLayout = () => {
     <div className="flex h-screen w-screen flex-col">
       {/* Header */}
       <header className="flex justify-between px-5 py-5 bg-linear-to-r from-purple-500 to-pink-600">
-        <h2 className="text-lg font-bold text-white">Add Highlight</h2>
+        <h2 className="text-lg font-bold text-white font-hfont">Add Highlight</h2>
 
         <button
           className="hover:bg-white/20 rounded-full w-7 h-7 flex justify-center items-center"
@@ -70,7 +71,7 @@ const AddHighlightLayout = () => {
       </main>
 
       {/* Footer buttons */}
-      <div className="flex justify-around items-center px-4 py-4 bg-[#F8FAFC] border-t border-gray-300">
+      <div className="font-hfont tracking-wider flex justify-around items-center px-4 py-4 bg-[#F8FAFC] border-t border-gray-300">
         <button
           onClick={handleClose}
           className="px-10 py-2 border border-gray-400 rounded-xl font-semibold text-gray-600 hover:bg-black/5"
@@ -79,7 +80,8 @@ const AddHighlightLayout = () => {
         </button>
         <button
           onClick={handleShare}
-          className="px-10 py-2 rounded-xl font-semibold text-white bg-linear-to-r from-purple-500 to-pink-600"
+          disabled={!text && !imageFile}
+          className={`px-10 py-2 rounded-xl font-semibold text-white bg-linear-to-r from-purple-500 to-pink-600 ${!text && !imageFile ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           Share
         </button>
