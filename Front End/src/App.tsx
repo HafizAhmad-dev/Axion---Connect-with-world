@@ -5,7 +5,7 @@ import RequestsPage from './Pages/RequestsPage';
 import Highlight from './Pages/Highlights';
 import AddHighlightSection from './Pages/AddHighlightSection';
 import AddHighlightLayout from './Layouts/AddHighlightLayout';
-import ChatLayout from './Pages/ChatLayout';
+import ChatLayout from './Pages/ChatWindow';
 
 const App = () => {
   return (

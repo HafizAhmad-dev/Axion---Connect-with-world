@@ -17,6 +17,7 @@ const HighlightCard = React.memo((data: Props) => {
     function changeHighlight() {
         setShowHighlight(true);
     };
+        console.log(data.name)
 
     return (
         <>  
@@ -24,7 +25,7 @@ const HighlightCard = React.memo((data: Props) => {
 
             <div className='flex gap-5 px-1 py-1 mt-4 hover:bg-white' onClick={changeHighlight}>
                 <div className="avatar relative ">
-                    <PhotoHolder css='h-12 w-12' />
+                    <PhotoHolder css='h-12 w-12' username={data.name} />
                     {/* //highlist count circle */}
                     {data.statusCount > 0 && <div className='highlightCount absolute h-5 w-5 right-0 bottom-0 rounded-full bg-[#9810FA] border border-gray-300 flex justify-center items-center text-[12px] text-white' >{data.statusCount}</div>}
                 </div>

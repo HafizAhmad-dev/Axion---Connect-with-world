@@ -32,7 +32,7 @@ const UserHighlight = () => {
             >
                 <div className="flex gap-3">
                     <div className="avatar relative">
-                        <PhotoHolder css="h-11 w-11" />
+                        <PhotoHolder css="h-11 w-11" username="You" />
                         {user.highlights.length >= 1 ? <HgCount length={user.highlights.length} /> : <PlusIcon onClick={addHighlight} />}
                     </div>
                     <div className="">
