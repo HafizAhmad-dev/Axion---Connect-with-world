@@ -18,9 +18,6 @@ const Home = () => {
         navigate('user/chat')
     }
 
-    if(showChat){
-        return <UnderDev />
-    }
     return (
         <div className='bg-home pb-10 h-full pt-3 px-3'>
             <div className="search border flex items-center px-2 py-1 gap-4 rounded-lg border-gray-300 shadow-sm ">
