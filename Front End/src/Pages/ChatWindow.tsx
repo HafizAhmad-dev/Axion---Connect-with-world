@@ -3,16 +3,17 @@ import { useState } from "react";
 import type { RootState } from "../Store/store";
 import PhotoHolder from "../Components/PhotoHolder";
 import { Send } from "lucide-react";
-import type { ChatPartner } from "../Types/ChatPartner.type";
 import { mockMessages } from "../MockData/MockMessages";
 import ChatMessage from "../Components/ChatBubble";
 import type { Message } from "../Types/Message.type";
 import { v4 as uuid } from "uuid"; // to generate unique ids
+import type { Conversation } from "../Types/Conversation.type";
 
 const ChatLayout = () => {
-  const chatPartner = useSelector((state: RootState) => state.chatPartner) as ChatPartner;
+  const convo = useSelector((state: RootState) => state.coversation) as Conversation;
+  const contacts = useSelector((state:RootState) => state.contacts.contacts)
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>(mockMessages[chatPartner.id] || []);
+  const [messages, setMessages] = useState<Message[]>(mockMessages[convo.id] || []);
 
   // Add a new message
   function addMsg(text: string) {
@@ -20,7 +21,7 @@ const ChatLayout = () => {
 
     const newMsg: Message = {
       id: uuid(),
-      conversationId: chatPartner.id, // reference to the contact
+      conversationId: convo.id, // reference to the contact
       senderId: "me",
       textContent: text,
       timestamp: new Date().toISOString(),
@@ -31,19 +32,22 @@ const ChatLayout = () => {
     setMessages([newMsg, ...messages]); // because your main is flex-col-reverse
 
     // update mockMessages (optional for mock)
-    if (!mockMessages[chatPartner.id]) mockMessages[chatPartner.id] = [];
-    mockMessages[chatPartner.id].unshift(newMsg); // add at start for reverse layout
+    if (!mockMessages[convo.id]) mockMessages[convo.id] = [];
+    mockMessages[convo.id].unshift(newMsg); // add at start for reverse layout
 
     setInput(""); // clear input
   }
+  const otherParticipantId = convo.participants.find(p => p !== "me");
+  const contact = contacts.find(c => c.id === otherParticipantId);
+  const contactName:string = contact?.username ?? "Unknown";
 
   return (
     <section className="h-screen w-screen flex flex-col">
       <header className="bg-white px-4 py-3 shadow-xl flex gap-2 items-center">
-        <PhotoHolder username={chatPartner.username || 'Test User'} css="h-11 w-11" />
+        <PhotoHolder username={contactName || 'Test User'} css="h-11 w-11" />
         <div>
-          <h2 className="text-xl font-medium font-gfont">{chatPartner.username || 'Test User'}</h2>
-          <p className="text-sm text-gray-500 font-gfont">{chatPartner.isOnline ? 'Online' : 'Offline'}</p>
+          <h2 className="text-xl font-medium font-gfont">{contactName|| 'Test User'}</h2>
+          <p className="text-sm text-gray-500 font-gfont">{contact?.isOnline ? 'Online' : 'Offline'}</p>
         </div>
       </header>
 

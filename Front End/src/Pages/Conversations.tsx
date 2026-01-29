@@ -1,26 +1,29 @@
+import { mockConversations } from '../MockData/MockConversation';
 import { Search } from 'lucide-react';
-import { mockContacts } from '../MockData/MockUsers';
 import PhotoHolder from '../Components/PhotoHolder';
-import { useState } from 'react';
-import UnderDev from '../Components/UnderDev';
-import { setChatPartner } from '../Store/Slices/ChatPartner';
 import { useNavigate } from 'react-router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { mockContacts } from '../MockData/MockContacts';
+import { setCurrentConversation } from '../Store/Slices/CurrentConversation';
+import type { Conversation } from '../Types/Conversation.type';
+import { setContacts } from '../Store/Slices/Contacts.slice';
+import { useEffect } from 'react';
+import type { RootState } from '../Store/store';
+
 const Home = () => {
-    const [showChat,setShowChat] = useState(false);
+    const contacts = useSelector((state:RootState) => state.contacts.contacts);
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    function OpenChat(username:string,id:string){
-        console.log(username,id)
-        setShowChat(true);
-        dispatch(setChatPartner({id,username}));
+    useEffect(() => {
+        dispatch(setContacts(mockContacts));
+    }, [dispatch]);
+
+    function OpenChat(convo: Conversation) {
+        dispatch(setCurrentConversation(convo));
         navigate('user/chat')
     }
 
-    if(showChat){
-        return <UnderDev />
-    }
     return (
         <div className='bg-home pb-10 h-full pt-3 px-3'>
             <div className="search border flex items-center px-2 py-1 gap-4 rounded-lg border-gray-300 shadow-sm ">
@@ -33,27 +36,39 @@ const Home = () => {
             <div className="usersList flex flex-col gap-2 mt-2 max-h-full pt-2 overflow-auto no-scrollbar">
 
                 {/* //User Card */}
-                {mockContacts.map((user) => {
-                    return(
-                    
-                    <div onClick={() => OpenChat(user.name,user.id)} key={user.id} className="User flex justify-between px-2 py-2 hover:shadow-usercard rounded-xl ">
-                        {/* //div with image and main content */}
-                        <div className='flex items-center gap-2'>
-                            <PhotoHolder css='h-11 w-11' username={user.name} />
-                            <div className="main">
-                                <h2 className='font-gfont '>{user.name}</h2>
-                                <p className='text-sm text-gray-500 font-gfont'>{user.lastMessage}</p>
+                {mockConversations.map((convo) => {
+                    const otherParticipantId = convo.participants.find(p => p !== "me");
+                    const contact = contacts.find(c => c.id === otherParticipantId);
+                    const contactName = contact?.username ?? "Unknown";
+
+                    return (
+                        <div
+                            key={convo.id}
+                            onClick={() => OpenChat(convo)}
+                            className="User flex justify-between px-2 py-2 hover:shadow-usercard rounded-xl cursor-pointer"
+                        >
+                            <div className='flex items-center gap-2'>
+                                <PhotoHolder css='h-11 w-11' username={contactName} />
+                                <div className="main">
+                                    <h2 className='font-gfont'>{contactName}</h2>
+                                    <p className='text-sm text-gray-500 font-gfont'>{convo.lastMessage}</p>
+                                </div>
+                            </div>
+
+                            <div className="right flex flex-col justify-center items-end">
+                                {convo.unreadCount > 0 && (
+                                    <p className="unreadMsgsCount text-center text-[12px] rounded-full h-5 w-5 bg-linear-to-br from-[#9189ff] to-[#9f3fff] text-white font-semibold">
+                                        {convo.unreadCount}
+                                    </p>
+                                )}
+                                <p className={`time text-[12px] text-gray-400 font-semibold ${convo.unreadCount ? '' : 'mt-4'}`}>
+                                    {new Date(convo.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
                             </div>
                         </div>
+                    );
+                })}
 
-                        {/* // unread messages count and time */}
-                        <div className="right  flex flex-col flex-end justify-center">
-                            {user.unread > 0 && (<p className="unreadMsgsCount text-center text-[12px] rounded-full h-5 w-5 bg-linear-to-br from-[#9189ff] to-[#9f3fff] text-white font-semibold">{user.unread}</p>)}
-                            <p className={`time text-[12px] text-gray-400 font-semibold ${user.unread ? '' : 'mt-4'}`}>{user.time}</p>
-                        </div>
-
-                    </div>
-                )})}
 
             </div>
         </div>
