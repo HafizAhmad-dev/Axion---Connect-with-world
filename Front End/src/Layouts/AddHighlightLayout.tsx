@@ -1,8 +1,8 @@
 import { X } from "lucide-react";
-import { useDispatch } from "react-redux";
+// import { useDispatch } from "react-redux";
 import { Outlet, useNavigate } from "react-router";
-import { addHighlight } from "../Store/Slices/UserSlice";
-import type { Highlight } from "../MockData/MockHiglights";
+// import { addHighlight } from "../Store/Slices/UserSlice";
+// import type { Highlight } from "../MockData/MockHiglights";
 import { useState } from "react";
 
 export const backgroundPresets = [
@@ -24,7 +24,7 @@ export const backgroundPresets = [
 ];
 
 const AddHighlightLayout = () => {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // State lifted to layout
@@ -37,17 +37,17 @@ const AddHighlightLayout = () => {
   const handleShare = () => {
     if (!text.trim() && !imageFile) return; // prevent empty highlight
 
-    const newHighlight: Highlight = {
+    // const newHighlight: Highlight = {
 
-      id: Date.now().toString(),
-      type: imageFile ? "image" : "text",
-      content: text,
+    //   id: Date.now().toString(),
+    //   type: imageFile ? "image" : "text",
+    //   content: text,
 
-      backgroundColor: bgColor,
-      timestamp: new Date().toISOString(),
-    };
+    //   backgroundColor: bgColor,
+    //   timestamp: new Date().toISOString(),
+    // };
 
-    dispatch(addHighlight(newHighlight));
+    // dispatch(addHighlight(newHighlight));
     navigate(-1);
   };
 

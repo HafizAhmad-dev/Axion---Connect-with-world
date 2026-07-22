@@ -1,7 +1,6 @@
 import type { Conversation } from "../Types/Conversation.type";
 
-
-export const mockConversations:Conversation[] = [
+export const mockConversations: Conversation[] = [
   {
     id: "c1",
     participants: ["me", "u1"],
@@ -9,6 +8,7 @@ export const mockConversations:Conversation[] = [
     lastMessageTime: "2024-01-29T10:00:00Z",
     unreadCount: 1,
     settings: { isMuted: false },
+    isOnline: true,
   },
   {
     id: "c2",
@@ -16,6 +16,7 @@ export const mockConversations:Conversation[] = [
     lastMessage: "Thanks!",
     lastMessageTime: "2024-01-28T20:30:00Z",
     unreadCount: 0,
+    isOnline: true,
     settings: { isMuted: false },
   },
   {
@@ -24,6 +25,7 @@ export const mockConversations:Conversation[] = [
     lastMessage: "Got it.",
     lastMessageTime: "2024-01-28T19:15:00Z",
     unreadCount: 2,
+    isOnline: true,
     settings: { isMuted: true },
   },
 ];

@@ -1,0 +1,15 @@
+// @types/express/index.d.ts
+import * as express from 'express';
+
+declare global {
+  namespace Express {
+    interface Request {
+      user:{
+        id:string;
+        displayName:string;
+        username:string;
+        email:string;
+      }
+    }
+  }
+}

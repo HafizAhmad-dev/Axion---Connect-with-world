@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from "vite-plugin-pwa";
+import flowbiteReact from "flowbite-react/plugin/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -26,6 +27,12 @@ export default defineConfig({
           }
         ]
       }
-    })
+    }),
+    flowbiteReact(),
+    
   ],
+   server: {
+    host: '0.0.0.0', // Allow access from network
+    port: 5173,
+  },
 })

@@ -1,19 +1,16 @@
-import { configureStore } from '@reduxjs/toolkit'
-import { highlightsSlice } from './Slices/HighlightsSlice'
-import { userSlice } from './Slices/UserSlice'
-import { currentConversationSlice } from './Slices/CurrentConversation'
-import { contactsSlice } from './Slices/Contacts.slice'
+// Store/store.ts
+import { configureStore } from '@reduxjs/toolkit';
+import userReducer from './Slices/UserSlice';
+import conversationsReducer from './Slices/Conversations.slice';
+import messagesReducer from './Slices/Messages.slice';
 
 export const store = configureStore({
   reducer: {
-    highlights: highlightsSlice.reducer,
-    user:userSlice.reducer,
-    coversation:currentConversationSlice.reducer,
-    contacts:contactsSlice.reducer
+    user: userReducer,
+    conversations: conversationsReducer,  // This now handles both conversations and currentConversation
+    messages: messagesReducer,
   },
-})
+});
 
-// Infer the `RootState` and `AppDispatch` types from the store itself
-export type RootState = ReturnType<typeof store.getState>
-// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
-export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
