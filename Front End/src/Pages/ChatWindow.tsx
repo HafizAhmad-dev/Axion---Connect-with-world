@@ -36,6 +36,7 @@ import {
 } from "../services/localStorageService";
 
 import { Send, Database, ArrowDown } from "lucide-react";
+import { setActiveConversation } from "../services/socketEmittersService";
 
 const apiVersion = import.meta.env.VITE_API_VERSION;
 const EMPTY: Message[] = [];
@@ -71,7 +72,7 @@ const ChatLayout = () => {
 
   const appUserId = useSelector((s: RootState) => s.user.user?.id);
 
-  const conversationId = currentConversation?.id;
+  const conversationId = currentConversation?.id
 
   // RESET NEW MESSAGES COUNT
   useEffect(() => {
@@ -115,10 +116,20 @@ const ChatLayout = () => {
     setTimeout(() => setRecovered(false), 2000);
   }, [dispatch, conversationId]);
 
-  useEffect(() => {
-    recover();
-  }, []);
+  // useEffect(() => {
+  //   recover();
+  // }, []);
 
+  useEffect(()=> {
+    if(socket && conversationId && conversationId !== INVALID) {
+      setActiveConversation(socket,  conversationId);
+       return () => {
+      setActiveConversation(socket, null);
+    };
+    }
+
+  },[conversationId, socket]);
+  
   // ========== Set other user ==========
   useEffect(() => {
     if (!currentConversation?.participants || !appUserId) return;
@@ -162,8 +173,9 @@ const ChatLayout = () => {
 
     const fetch = async () => {
       try {
+        console.log("Fetching messages from API for conversation:", conversationId);
         const res = await apiFetch(
-          `/${apiVersion}/conversations/${conversationId}/messages`,
+          `/conversations/${conversationId}/messages`,
         );
 
         if (res.data.success) {
@@ -215,7 +227,7 @@ const ChatLayout = () => {
     if (!online) return;
 
     try {
-      const res = await apiFetch(`/${apiVersion}/messages/${conversationId}`, {
+      const res = await apiFetch(`/messages/${conversationId}`, {
         method: "POST",
         body: JSON.stringify({
           conversationId,

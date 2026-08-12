@@ -4,6 +4,8 @@ import { setUser, logoutUser } from "../Store/Slices/UserSlice";
 import { apiFetch } from "../utils/api";
 import type { UserType } from "../Types/User.type";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const useAuth = () => {
   const dispatch = useDispatch();
   const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -18,7 +20,7 @@ export const useAuth = () => {
     }
 
     try {
-      const res = await apiFetch("/api/v1/auth/me", {
+      const res = await apiFetch(`${API_URL}/auth/me`, {
         method: "GET",
       });
 

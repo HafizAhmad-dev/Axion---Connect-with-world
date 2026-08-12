@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import PhotoHolder from "./PhotoHolder";
 import axios from "axios";
 import { selectUser } from "../Store/Slices/UserSlice";
-import { setCurrentConversation } from "../Store/Slices/CurrentConversation";
+import { setCurrentConversation } from "../Store/Slices/Conversations.slice";
 import { apiFetch } from "../utils/api";
 
 // ✅ Updated User type to match backend status values

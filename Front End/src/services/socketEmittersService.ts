@@ -10,4 +10,8 @@ export function JoinConverstionsRooms(
 
 {
   socket.emit("join_conversations", conversationIds);
-}
+};
+
+export function setActiveConversation(socket: Socket, conversationId: string | null) {
+  socket.emit("set_active_conversation", conversationId);
+};

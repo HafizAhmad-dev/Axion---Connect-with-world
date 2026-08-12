@@ -1,3 +1,35 @@
+-- ============================================================
+-- DATABASE SCHEMA SUMMARY
+-- ============================================================
+--
+-- users
+--   Stores user accounts and authentication-related information.
+--
+-- friendships
+--   Stores relationships between users, including custom nicknames.
+--
+-- friendRequests
+--   Stores friend requests and their current status.
+--
+-- conversations
+--   Stores chat conversations. A conversation can be one-to-one
+--   or a group conversation.
+--
+-- conversation_participants
+--   Junction table connecting users to conversations.
+--   Also stores per-user conversation state such as unread count
+--   and last read time.
+--
+-- conversation_settings
+--   Stores per-user settings for each conversation:
+--   muted, pinned, and archived.
+--
+-- messages
+--   Stores individual messages belonging to conversations.
+--   Each message has a sender, content, and timestamps.
+--
+-- ============================================================
+
 -- ============================================
 -- USERS TABLE
 -- ============================================

@@ -9,9 +9,8 @@ export interface Message {
   content: string;
   createdAt: string;
   updatedAt: string;
-  isRead: boolean;
-  status?: string;
 }
+
 
 // Send a new message
 export async function sendMessage(
@@ -32,8 +31,7 @@ export async function sendMessage(
       sender_id AS "senderId",
       content,
       created_at AS "createdAt",
-      updated_at AS "updatedAt",
-      is_read AS "isRead"
+      updated_at AS "updatedAt"
   `;
 
   try {
@@ -50,6 +48,7 @@ export async function sendMessage(
   }
 }
 
+
 // Get messages for a conversation
 export async function getMessages(
   conversationId: string,
@@ -65,8 +64,7 @@ export async function getMessages(
         sender_id AS "senderId",
         content,
         created_at AS "createdAt",
-        updated_at AS "updatedAt",
-        is_read AS "isRead"
+        updated_at AS "updatedAt"
       FROM messages
       WHERE conversation_id = $1
       ORDER BY created_at DESC
@@ -90,6 +88,7 @@ export async function getMessages(
   }
 }
 
+
 // Get last message of a conversation
 export async function getLastMessage(
   conversationId: string
@@ -101,8 +100,7 @@ export async function getLastMessage(
       sender_id AS "senderId",
       content,
       created_at AS "createdAt",
-      updated_at AS "updatedAt",
-      is_read AS "isRead"
+      updated_at AS "updatedAt"
     FROM messages
     WHERE conversation_id = $1
     ORDER BY created_at DESC
@@ -118,29 +116,57 @@ export async function getLastMessage(
   }
 }
 
-// Mark messages as read
+
+// Mark conversation as read for one participant
 export async function markMessagesAsRead(
   conversationId: string,
   userId: string
 ): Promise<void> {
   const query = `
-    UPDATE messages
+    UPDATE conversation_participants
     SET
-      is_read = true,
-      updated_at = NOW()
+      unread_count = 0,
+      last_read_at = NOW()
     WHERE
       conversation_id = $1
-      AND sender_id != $2
-      AND is_read = false
+      AND user_id = $2
   `;
 
   try {
     await pool.query(query, [conversationId, userId]);
   } catch (error) {
-    console.error("Error marking messages as read:", error);
-    throw new Error("Failed to mark messages as read");
+    console.error("Error marking conversation as read:", error);
+    throw new Error("Failed to mark conversation as read");
   }
 }
+
+
+// Get unread count for one participant
+export async function getUnreadCount(
+  conversationId: string,
+  userId: string
+): Promise<number> {
+  const query = `
+    SELECT unread_count
+    FROM conversation_participants
+    WHERE
+      conversation_id = $1
+      AND user_id = $2
+  `;
+
+  try {
+    const result = await pool.query(query, [
+      conversationId,
+      userId,
+    ]);
+
+    return result.rows[0]?.unread_count ?? 0;
+  } catch (error) {
+    console.error("Error getting unread count:", error);
+    return 0;
+  }
+}
+
 
 // Delete a message
 export async function deleteMessage(
@@ -155,32 +181,14 @@ export async function deleteMessage(
   `;
 
   try {
-    const result = await pool.query(query, [messageId, userId]);
+    const result = await pool.query(query, [
+      messageId,
+      userId,
+    ]);
+
     return result.rowCount! > 0;
   } catch (error) {
     console.error("Error deleting message:", error);
     return false;
   }
 }
-
-// Get unread count
-export async function getUnreadCount(
-  conversationId: string,
-  userId: string
-): Promise<number> {
-  const query = `
-    SELECT COUNT(*)::int AS count
-    FROM messages
-    WHERE conversation_id = $1
-      AND sender_id != $2
-      AND is_read = false
-  `;
-
-  try {
-    const result = await pool.query(query, [conversationId, userId]);
-    return result.rows[0].count;
-  } catch (error) {
-    console.error("Error getting unread count:", error);
-    return 0;
-  }
-} 

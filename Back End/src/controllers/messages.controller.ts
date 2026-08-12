@@ -8,7 +8,6 @@ import {
 import { getConversationById } from "../../database/models/conversation.model";
 import { io } from "../socket/socket";
 
-
 export const sendNewMessage = async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { conversationId, content } = req.body;
@@ -30,17 +29,38 @@ export const sendNewMessage = async (req: Request, res: Response) => {
 
     const message = await sendMessage(conversationId, userId, content.trim());
 
-    console.log(`🔴 Backend: Emitting to room conversation:${conversationId}`);
-    console.log(`Convo typo, conversation:${conversationId}`);
-
     const roomName = `conversation:${conversationId}`;
 
     console.log("Room members:", io.sockets.adapter.rooms.get(roomName));
+    const room = io.sockets.adapter.rooms.get(roomName);
+
+
+    // Check which sockets currently have this conversation open
+    room?.forEach((socketId) => {
+      const socket = io.sockets.sockets.get(socketId);
+
+      if (!socket) return;
+
+      if (socket.data.activeConversation === conversationId) {
+        console.log(
+          `User ${socket.data.userId} has conversation ${conversationId} open`,
+        );
+
+        // Mark/read handling will go here
+      } else {
+        console.log(
+          `User ${socket.data.userId} does NOT have conversation ${conversationId} open`,
+        );
+
+        // Increase unread count / send unread notification here
+      }
+    });
 
     io.to(`conversation:${conversationId}`).emit("new_message", {
       message,
       conversationId,
     });
+
     res.status(201).json({ success: true, message });
   } catch (error) {
     console.error("Error sending message:", error);

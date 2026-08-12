@@ -16,7 +16,7 @@ import SearchUser from "../Components/SearchUser.input";
 import AnimatedSearchPanel from "../Components/AnimatedSearchPanel";
 import { saveCurrentConversation } from "../services/localStorageService";
 import { useSocket } from "../hooks/useSocket";
-const apiVersion = import.meta.env.VITE_API_VERSION;
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Home = () => {
   // ========== State ==========
@@ -43,12 +43,12 @@ const Home = () => {
     async function fetchConversations() {
       setLoading(true);
       try {
-        const response = await apiFetch(`/${apiVersion}/conversations`);
+        const response = await apiFetch(`${API_URL}/conversations`);
         const data: Conversation[] =
           response.data.conversations || response.data;
         dispatch(setConversations(data));
       } catch (err) {
-        console.error("Failed to fetch conversations:", err);
+        console.error("Failed to fetch conversations: a", err);
       } finally {
         setLoading(false);
       }

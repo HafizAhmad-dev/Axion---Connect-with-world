@@ -7,6 +7,8 @@ import { selectUser, setUser } from "../Store/Slices/UserSlice";
 import type { AppDispatch } from "../Store/store";
 import { apiFetch } from "../utils/api";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type LoginForm = {
   email?: string;
   username?: string;
@@ -197,7 +199,7 @@ const Login = () => {
         };
 
     try {
-      const response = await apiFetch(`/api/v1/auth/login`, {
+      const response = await apiFetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

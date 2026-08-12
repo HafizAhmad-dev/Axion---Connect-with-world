@@ -4,7 +4,7 @@ import {
   getUserConversations,
   getMessages,
   sendMessage,
-  markMessagesAsRead,
+  markConversationAsRead,
   updateConversationSettings,
   updateConversationNickname,
 } from "../../database/models/conversation.model";
@@ -75,7 +75,7 @@ export const getConversationMessages = async (req: Request, res: Response) => {
     const messages = await getMessages(conversationId, limit);
 
     // Mark messages as read in background
-    markMessagesAsRead(conversationId, currentUserId).catch(console.error);
+    markConversationAsRead(conversationId, currentUserId).catch(console.error);
 
     res.json({ success: true, messages });
   } catch (error) {
@@ -123,11 +123,11 @@ export const markMessagesAsReadController = async (
   }
 
   try {
-    await markMessagesAsRead(conversationId, currentUserId);
+    await markConversationAsRead(conversationId, currentUserId);
     res.json({ success: true });
   } catch (error) {
-    console.error("Error marking messages as read:", error);
-    res.status(500).json({ error: "Failed to mark messages as read" });
+    console.error("Error marking conversation as read:", error);
+    res.status(500).json({ error: "Failed to mark conversation as read" });
   }
 };
 

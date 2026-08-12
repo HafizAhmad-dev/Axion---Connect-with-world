@@ -7,43 +7,56 @@ export let io: SocketServer;
 export const initializeSocket = (server: HttpServer) => {
   io = new SocketServer(server, {
     cors: {
-      origin: ["http://localhost:5173", "http://192.168.38.xxx:5173"],
+      origin: ["http://localhost:5173"],
       credentials: true,
     },
   });
 
-  // Authentication middleware
+  // Authenticate the socket connection before allowing the client to connect
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token;
+
       if (!token) {
         return next(new Error("Authentication error"));
       }
 
       const decoded = verifyToken(token) as { userId: string };
+
       socket.data.userId = decoded.userId;
+
       next();
     } catch (error) {
       next(new Error("Authentication error"));
     }
   });
 
+  // Handle a new authenticated socket connection
   io.on("connection", (socket) => {
-    console.log("Connected:", socket.id);
-    // Join user to their personal room
+    console.log("=========================================");
+    console.log("Connected:", socket.data);
+
+    // Join the user to their personal room for user-specific events
     socket.join(`user:${socket.data.userId}`);
 
+    // Handle joining multiple conversation rooms for receiving live messages
     socket.on("join_conversations", (conversationIds: string[]) => {
       conversationIds.forEach((convId) => {
-        console.log(
-          `Joinding Convo typo:  conversation:${convId} socketId:${socket.id}`,
-        );
+       
         socket.join(`conversation:${convId}`);
       });
-      console.log("Joining Conversationss Backend", conversationIds);
-      console.log(socket.rooms);
     });
 
+    socket.on("set_active_conversation", (conversationId: string | null) => {
+      if(conversationId){
+        socket.data.activeConversation = conversationId;
+      }
+      else {
+        delete socket.data.activeConversation;
+      }
+    });
+
+    // Handle socket disconnection
     socket.on("disconnect", (reason) => {
       console.log("Disconnected:", socket.id, reason);
     });

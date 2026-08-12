@@ -23,6 +23,7 @@ export const useSocket = () => {
 
     const handleConnect = () => {
       setIsConnected(true);
+      console.log("🔌 Socket connected");
     };
 
     const handleDisconnect = () => {

@@ -3,7 +3,7 @@ import { apiFetch } from "../utils/api";
 
 const useInternetConnection = () => {
   const [online, setOnline] = useState(navigator.onLine);
-  // const apiVersion: string = import.meta.env.VITE_API_VERSION;
+  const   API_URL: string = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const verifyConnection = async () => {
@@ -13,14 +13,16 @@ const useInternetConnection = () => {
       }
 
       try {
-        await apiFetch(`/health`, {
-          method: "HEAD",
+        await apiFetch(`http://localhost:5000/health`, {
+          method: "GET",
           cache: "no-cache",
         });
 
         setOnline(true);
+        console.log("✅ Internet connection is active");
       } catch {
         setOnline(false);
+        console.error("❌ Internet connection is inactive");
       }
     };
 

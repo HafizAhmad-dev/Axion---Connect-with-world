@@ -13,6 +13,8 @@ import type {
 } from "../Types/Register.types";
 import { saveUser } from "../services/localStorageService";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export const useRegister = () => {
   const [form, setForm] = useState<FormState>({
     username: "",
@@ -120,7 +122,7 @@ export const useRegister = () => {
      
       localStorage.setItem("token", response.data.token);
 
-      const userResponse = await apiFetch("/api/v1/auth/me/");
+      const userResponse = await apiFetch(`${API_URL}/auth/me`);
       const userData = userResponse.data;
 
       dispatch(setUser(userData.user));
