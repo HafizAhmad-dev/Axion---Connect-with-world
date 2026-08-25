@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 import Header from "../Components/Header";
 import Navbar from "../Components/Navbar";
-import { useAuth } from "../hooks/auth.hook";
+import { useAuth } from "../hooks/useAuth.hook";
 
 const Layout = () => {
   const { checking } = useAuth();

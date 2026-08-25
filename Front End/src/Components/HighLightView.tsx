@@ -1,63 +1,101 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
 import type { RootState } from "../Store/store";
 import { markAsSeen } from "../Store/Slices/HighlightsSlice";
+import { apiFetch } from "../utils/api";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 interface HighLightViewProps {
-  highlightsId: string;
+  ownerId: string;
   owner: "self" | "other";
   onComplete: () => void;
 }
 
-const HighLightView = ({ highlightsId, onComplete, owner }: HighLightViewProps) => {
+interface HighlightDetails {
+  displayName:string,
+  username:string,
+  time: string,
+}
+
+const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
   const dispatch = useDispatch();
 
-  // Select highlights from Redux store
-  const selfHighlights = useSelector((state: RootState) => state.user.highlights);
-  const otherHighlights = useSelector((state: RootState) =>
-    state.highlights.highlights.find(hg => hg.id === highlightsId)
+  const user = useSelector((state:RootState) => state.user.user);
+  // Friend data — only needed when viewing someone else's highlights
+  const friend = useSelector((state: RootState) =>
+    state.highlights.friendsHighlights.find((fh) => fh.userId === ownerId),
   );
 
-  // Memoize the final object to prevent new references each render
-  const userHighlights = useMemo(() => {
-    if (owner === "self") {
-      return {
-        id: 'self',
-        user: "You",
-        highlight: selfHighlights
-      };
-    }
-    return otherHighlights ?? null;
-  }, [owner, selfHighlights, otherHighlights]);
+  // My highlights — only needed when owner === "self"
+  const myHighlights = useSelector(
+    (state: RootState) => state.highlights.myHighlights,
+  );
 
-  // Extract highlights array safely
-  const highlights = userHighlights?.highlight || [];
+  // Decide which highlights this viewer should display
+  const highlights =
+    owner === "self" ? myHighlights : (friend?.highlights ?? []);
 
   const [index, setIndex] = useState(0);
   const [progress, setProgress] = useState(0);
   const [paused, setPaused] = useState(false);
 
   const totalTime = 5000;
+
   const frameRef = useRef<number>(0);
   const startTimeRef = useRef<number>(0);
   const pauseTimeRef = useRef<number>(0);
 
-  // Animate progress
+  async function markAsView(highlightId: string) {
+    try {
+      const response = await apiFetch(
+        `${apiUrl}/highlights/${highlightId}/view`,
+        { method: "POST" },
+      );
+      console.log("view response", response);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /*
+
+
+   * Reset viewer when a different owner is opened.
+   */
   useEffect(() => {
-    if (!highlights.length) return;
+    setIndex(0);
+    setProgress(0);
+    setPaused(false);
+
+    startTimeRef.current = 0;
+    pauseTimeRef.current = 0;
+  }, [ownerId]);
+
+  /*
+   * Animate current highlight.
+   */
+  useEffect(() => {
+    if (highlights.length === 0) {
+      return;
+    }
 
     const animate = (time: number) => {
       if (!paused) {
         if (pauseTimeRef.current) {
           startTimeRef.current += time - pauseTimeRef.current;
+
           pauseTimeRef.current = 0;
         }
 
         const elapsed = time - startTimeRef.current;
-        const p = Math.min((elapsed / totalTime) * 100, 100);
-        setProgress(p);
 
-        if (p >= 100) {
+        const currentProgress = Math.min((elapsed / totalTime) * 100, 100);
+
+        setProgress(currentProgress);
+
+        if (currentProgress >= 100) {
           nextHighlight();
           return;
         }
@@ -69,75 +107,204 @@ const HighLightView = ({ highlightsId, onComplete, owner }: HighLightViewProps) 
     };
 
     startTimeRef.current = performance.now();
+
     frameRef.current = requestAnimationFrame(animate);
 
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [paused, index, highlights]);
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+    };
+  }, [paused, index, highlights.length]);
 
+  /*
+   * Move to next highlight.
+   */
   const nextHighlight = () => {
-    if (index === highlights.length - 1) {
-      setTimeout(() => {
-        dispatch(markAsSeen(userHighlights?.id || highlightsId));
-        onComplete();
-      }, 0);
-
+    if (index >= highlights.length - 1) {
       setProgress(100);
+
+      /*
+       * Only mark someone else's highlight as viewed.
+       * Your own highlight cannot be "viewed by yourself".
+       */
+      if (owner === "other") {
+        dispatch(markAsSeen(ownerId));
+      }
+
+      onComplete();
+
       return;
     }
 
-    setIndex(prev => prev + 1);
+    setIndex((prev) => prev + 1);
     setProgress(0);
   };
 
+  /*
+   * Move to previous highlight.
+   */
   const prevHighlight = () => {
-    setIndex(prev => (prev === 0 ? highlights.length - 1 : prev - 1));
+    setIndex((prev) => (prev === 0 ? highlights.length - 1 : prev - 1));
+
     setProgress(0);
   };
 
+  /*
+   * Left side = previous
+   * Right side = next
+   */
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
+
     const x = e.clientX - rect.left;
 
-    if (x < rect.width / 3) prevHighlight();
-    else if (x > (2 * rect.width) / 3) nextHighlight();
-    else setProgress(0);
+    if (x < rect.width / 3) {
+      prevHighlight();
+    } else if (x > (2 * rect.width) / 3) {
+      nextHighlight();
+    }
   };
 
-  if (!userHighlights) return null; // nothing to show
+  /*
+   * Nothing to display.
+   */
+  if (highlights.length === 0) {
+    return null;
+  }
+
+  const currentHighlight = highlights[index];
 
   useEffect(() => {
-    console.log(userHighlights)
-  }, [userHighlights]);
+    if (owner === "other" && currentHighlight) {
+      markAsView(currentHighlight.id);
+    }
+  }, [currentHighlight, owner]);
 
+  function formatTime(time: string): string {
+    const date = new Date(time);
+    const now = new Date();
+
+    const timeString = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    const isToday: boolean =
+      date.getFullYear() === now.getFullYear() &&
+      date.getMonth() === now.getMonth() &&
+      date.getDate() === now.getDate();
+
+    if (isToday) {
+      return `Today, ${timeString}`;
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const isYesterday: boolean =
+      date.getFullYear() === yesterday.getFullYear() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getDate() === yesterday.getDate();
+
+    if (isYesterday) {
+      return `Yesterday, ${timeString}`;
+    }
+
+    const dateString = date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    return `${dateString}, ${timeString}`;
+  }
+
+const highlightDetails: HighlightDetails = {
+  displayName:
+    owner === "self"
+      ? user?.displayName ?? "You"
+      : friend?.displayName ?? "",
+
+  username:
+    owner === "self"
+      ? user?.username ?? ""
+      : friend?.username ?? "",
+
+  time: formatTime(currentHighlight.createdAt),
+};
   return (
     <div
-      className={`fixed inset-0 z-99 flex flex-col justify-center items-center ${highlights[index]?.backgroundColor ?? ''} bg-cover bg-center`}
-      style={{ background: highlights[index].backgroundColor }}
+      className={`fixed inset-0 z-99 flex flex-col justify-center items-center bg-$ bg-cover bg-center`}
+      style={{
+        backgroundColor: currentHighlight.background ?? "black",
+      }}
       onClick={handleClick}
       onPointerDown={() => setPaused(true)}
       onPointerUp={() => setPaused(false)}
       onPointerLeave={() => setPaused(false)}
     >
-      {/* Top segmented progress bars */}
+      {/* Progress bars */}
       <div className="absolute top-4 left-0 right-0 flex gap-1 px-4">
         {highlights.map((_, i) => {
           const width = i < index ? 100 : i === index ? progress : 0;
+
           return (
-            <div key={i} className="flex-1 h-2 bg-white/30 rounded overflow-hidden">
-              <div className="h-full bg-white rounded" style={{ width: `${width}%` }} />
+            <div
+              key={i}
+              className="flex-1 h-2 bg-white/30 rounded overflow-hidden"
+            >
+              <div
+                className="h-full bg-white rounded"
+                style={{
+                  width: `${width}%`,
+                }}
+              />
             </div>
           );
         })}
       </div>
+     <div className="details absolute top-9 left-10 text-white">
+  <div className="flex items-center gap-2">
+    <h3 className="text-2xl mb-0 leading-none font-bold pb-0">
+      {highlightDetails.displayName}
+    </h3>
 
-      {/* Highlight content */}
-      <p className="text-white text-center text-3xl font-semibold drop-shadow-lg px-4 max-w-[90%] wrap-break-word">
-        {highlights[index]?.content}
-      </p>
+    <p className="time">
+      {highlightDetails.time}
+    </p>
+  </div>
 
-      {/* Username at bottom */}
+  <h4 className="pb-0 mb-0 leading-none text-sm">
+    @{highlightDetails.username}
+  </h4>
+</div>
+      {/* Text highlight */}
+      {currentHighlight.type === "text" && (
+        <p className="text-white text-center text-3xl font-semibold drop-shadow-lg px-4 max-w-[90%] wrap-break-word">
+          {currentHighlight.caption}
+        </p>
+      )}
+
+      {/* Image highlight */}
+      {currentHighlight.type === "image" && (
+        <img
+          src={currentHighlight.mediaUrl ?? ""}
+          alt={currentHighlight.caption ?? "Highlight"}
+          className="max-h-[80vh] max-w-[90vw] object-contain"
+        />
+      )}
+
+      {/* Video highlight */}
+      {currentHighlight.type === "video" && (
+        <video
+          src={currentHighlight.mediaUrl ?? ""}
+          className="max-h-[80vh] max-w-[90vw] object-contain"
+          autoPlay
+          playsInline
+        />
+      )}
+
+      {/* Owner name */}
       <p className="absolute bottom-8 text-white text-lg font-medium drop-shadow-md">
-        {userHighlights.user}
+        {owner === "self" ? "You" : friend?.displayName}
       </p>
     </div>
   );

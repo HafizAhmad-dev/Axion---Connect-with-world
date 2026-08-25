@@ -115,7 +115,7 @@ export const useRegister = () => {
     };
 
     try {
-      const response = await apiFetch("/api/v1/auth/register", {
+      const response = await apiFetch(`${API_URL}/auth/register`, {
         method: "POST",
         body: JSON.stringify(payload),
       });

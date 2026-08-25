@@ -20,8 +20,12 @@ const AddTextHg = () => {
         className="preview relative flex justify-center items-center w-[90%] h-60 rounded-2xl shadow-md"
         style={{ background: bgColor }}
       >
-        <EditableText value={text} onChange={setText} className="relative text-center px-3 outline-none wrap-break-words whitespace-pre-wrap min- text-xl empty:before:content-[attr(data-placeholder)] min-w-40 empty:before:min-w-40 empty:before:absolute empty:before:left-1/2 empty:before:top-1/2 empty:before:-translate-x-1/2 empty:before:-translate-y-1/2
-      empty:before:text-gray-500 empty:before:pointer-events-none"  />
+        <EditableText
+          value={text}
+          onChange={setText}
+          className="relative text-center px-3 outline-none wrap-break-words whitespace-pre-wrap min- text-xl empty:before:content-[attr(data-placeholder)] min-w-40 empty:before:min-w-40 empty:before:absolute empty:before:left-1/2 empty:before:top-1/2 empty:before:-translate-x-1/2 empty:before:-translate-y-1/2
+      empty:before:text-gray-500 empty:before:pointer-events-none"
+        />
       </div>
 
       {/* Character counter */}
@@ -31,7 +35,9 @@ const AddTextHg = () => {
 
       {/* Background selector */}
       <div className="mt-4 w-full flex flex-col items-center">
-        <p className="w-full ml-8 text-gray-500 font-semibold text-sm">Backgrounds</p>
+        <p className="w-full ml-8 text-gray-500 font-semibold text-sm">
+          Backgrounds
+        </p>
         <div className="grid grid-cols-6 gap-2 mt-2">
           {backgroundPresets.map((color, index) => (
             <div
@@ -48,5 +54,3 @@ const AddTextHg = () => {
 };
 
 export default AddTextHg;
-
-

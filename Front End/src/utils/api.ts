@@ -2,8 +2,15 @@
 import axios, { AxiosError } from "axios";
 import { store } from "../Store/store"; // Import the actual store
 import { logoutUser } from "../Store/Slices/UserSlice";
+import type { AxiosResponse } from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+interface ApiOptions {
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  body?: unknown;
+  headers?: Record<string, string>;
+}
 
 // Create axios instance
 const apiClient = axios.create({
@@ -50,13 +57,17 @@ apiClient.interceptors.response.use(
 );
 
 // Wrapper function for easy use
-export const apiFetch = async (endpoint: string, options: any = {}) => {
+export const apiFetch = async <T>(
+  endpoint: string,
+  options: ApiOptions = {},
+): Promise<AxiosResponse<T>> => {
   const response = await apiClient({
     url: endpoint,
-    method: options.method || "GET",
+    method: options.method ?? "GET",
     data: options.body,
     headers: options.headers,
   });
+
   return response;
 };
 

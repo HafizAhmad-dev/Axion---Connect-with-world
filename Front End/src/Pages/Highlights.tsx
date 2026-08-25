@@ -1,65 +1,69 @@
-import HighlightCard from "../Components/HighlightCard"
-import UserHighlight from "../Components/UserHighlight"
-import { useSelector } from 'react-redux'
-import type { RootState } from "../Store/store"
+import HighlightCard from "../Components/HighlightCard";
+import UserHighlight from "../Components/UserHighlight";
+import { useHighlights } from "../hooks/useHighligts.hook";
 
 const Highlight = () => {
-  // Get the highlights array from the Redux store
-  // const HighlightsData = useSelector((state: RootState) => state.highlights.highlights);
- 
+  const friendsHighlights = useHighlights();
 
+  const unviewedHighlights = friendsHighlights
+    .map((friend) => ({
+      ...friend,
+      highlights: friend.highlights.filter(
+        (highlight) => !highlight.viewed,
+      ),
+    }))
+    .filter((friend) => friend.highlights.length > 0);
+
+  const viewedHighlights = friendsHighlights
+    .map((friend) => ({
+      ...friend,
+      highlights: friend.highlights.filter(
+        (highlight) => highlight.viewed,
+      ),
+    }))
+    .filter((friend) => friend.highlights.length > 0);
 
   return (
-    // <div className="h-full px-3 py-3 bg-highlight-section overflow-auto no-scrollbar">
+    <div className="h-full px-3 py-3 bg-highlight-section overflow-auto no-scrollbar">
+      <UserHighlight />
 
-    //   {/* ===== User's own Highlight section ===== */}
-    //   <UserHighlight />
+      {/* Unviewed */}
+      {unviewedHighlights.length > 0 && (
+        <div className="mt-6">
+          <p className="text-gray-400 font-semibold text-sm">
+            Recent Highlights
+          </p>
 
-    //   {/* ===== Recent Highlights ===== */}
-    //   <div className="mt-6">
-    //    { HighlightsData.filter(hg => !hg.seen).length > 0 && <p className='text-gray-400 font-semibold text-sm'>Recent Highlights</p>}
-    //     {
-    //       // Filter highlights that are NOT seen yet
-    //       // Map over them and render a HighlightCard for each
-    //       HighlightsData
-    //         .filter(hg => !hg.seen)
-    //         .map(hg =>
-    //           <HighlightCard
-    //             key={hg.id} 
-    //             id={hg.id}               // unique key for React list rendering
-    //             highlights  ={hg.highlight}  // array of individual highlights for this user
-    //             name={hg.user}             // username
-    //             time={hg.time}             // time of highlight
-    //             statusCount={hg.highlight.length} // number of highlights to show badge
-    //           />
-    //         )
-    //     }
-    //   </div>
-
-    //   {/* ===== Viewed Highlights ===== */}
-    //   <div className="mt-6">
-    //    { HighlightsData.filter(hg => hg.seen).length > 0 && <p className='text-gray-400 font-semibold text-sm'>Viewed Highlights</p>}
-    //     {
-    //       // Filter highlights that have already been seen
-    //       // Map over them and render a HighlightCard for each
-    //       HighlightsData
-    //         .filter(hg => hg.seen)
-    //         .map(hg =>
-    //           <HighlightCard
-    //             key={hg.id}
-    //             id={hg.id}
-    //             highlights={hg.highlight}
-    //             name={hg.user}
-    //             time={hg.time}
-    //             statusCount={hg.highlight.length}
-    //           />
-    //         )
-    //     }
-    //   </div>
-    // </div>
-      <div className="h-full px-3 py-3 bg-highlight-section overflow-auto no-scrollbar">
+          {unviewedHighlights.map((friend) => (
+            <HighlightCard
+              key={friend.userId}
+              id={friend.userId}
+              highlights={friend.highlights}
+              name={friend.displayName}
+            />
+          ))}
         </div>
-  )
-}
+      )}
 
-export default Highlight
+      {/* Viewed */}
+      {viewedHighlights.length > 0 && (
+        <div className="mt-6">
+          <p className="text-gray-400 font-semibold text-sm">
+            Viewed Highlights
+          </p>
+
+          {viewedHighlights.map((friend) => (
+            <HighlightCard
+              key={friend.userId}
+              id={friend.userId}
+              highlights={friend.highlights}
+              name={friend.displayName}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Highlight;

@@ -1,4 +1,4 @@
-import useInitials from "../hooks/initials";
+import useInitials from "../hooks/useInitials";
 
 type PhotoHolderProps = {
     css?: string;

@@ -3,12 +3,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import userReducer from './Slices/UserSlice';
 import conversationsReducer from './Slices/Conversations.slice';
 import messagesReducer from './Slices/Messages.slice';
+import highlightsReducer from './Slices/Highlights.slice';
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
-    conversations: conversationsReducer,  // This now handles both conversations and currentConversation
+    conversations: conversationsReducer, 
     messages: messagesReducer,
+    highlights:highlightsReducer, 
   },
 });
 

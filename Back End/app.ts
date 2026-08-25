@@ -8,6 +8,7 @@ import messagesRouter from './src/routes/messages.routes.js';
 import usersRouter from './src/routes/users.routes.js'
 import authRouter from './src/routes/auth.routes.js'
 import requestsRouter from './src/routes/requests.route.js'
+import highlightsRouter from './src/routes/highlights.routes.js'
 import { authMiddleware } from "./src/middlewares/auth.middleware.js";
 import friendsRouter from "./src/routes/friends.routes.js";
 import pool from "./database/db.conn.js";  // ← Add this import
@@ -51,6 +52,7 @@ app.use(`${baseURL}/users`, usersRouter);
 app.use(`${baseURL}/auth`, authRouter);
 app.use(`${baseURL}/requests`, authMiddleware, requestsRouter);
 app.use(`${baseURL}/friends`, authMiddleware, friendsRouter);
+app.use(`${baseURL}/highlights`, authMiddleware, highlightsRouter);
 
 // Health check endpoint
 app.get('/health', async (req: Request, res: Response) => {
