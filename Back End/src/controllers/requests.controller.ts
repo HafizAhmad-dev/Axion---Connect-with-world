@@ -84,36 +84,70 @@ export const getReqs = async (req: Request, res: Response) => {
 
 // ================ ACCEPT REQUEST =========================
 export const acceptRequest = async (req: Request, res: Response) => {
-  const { requestId } = req.body;
-  const currentUserId = (req as any).user?.id;
-  
-  if (!requestId) {
-    return res.status(400).json({ error: 'Request ID is required' });
+  const { requestId } = req.body ?? {};
+  const currentUserId = req.user?.id;
+
+  // Authentication check
+  if (!currentUserId) {
+    return res.status(401).json({
+      success: false,
+      error: "Unauthorized",
+    });
   }
-  
+
+  // Request ID validation
+  if (typeof requestId !== "string" || !requestId.trim()) {
+    return res.status(400).json({
+      success: false,
+      error: "Request ID is required",
+    });
+  }
+
   try {
-    const result = await acceptFriendRequest(requestId, currentUserId);
-    
+    const result = await acceptFriendRequest(
+      requestId.trim(),
+      currentUserId
+    );
+
     return res.status(200).json({
       success: true,
-      message: 'Friend request accepted',
-      data: result
+      message: "Friend request accepted",
+      data: result,
     });
-    
-  } catch (error: any) {
-    // Handle by error code (not message)
-    if (error.code === 'NOT_FOUND') {
-      return res.status(404).json({ error: error.message });
+  } catch (error: unknown) {
+    // Expected application errors
+    if (error instanceof Error && "code" in error) {
+      const code = (error as { code: string }).code;
+
+      if (code === "NOT_FOUND") {
+        return res.status(404).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (code === "UNAUTHORIZED") {
+        return res.status(403).json({
+          success: false,
+          error: error.message,
+        });
+      }
+
+      if (code === "CONFLICT") {
+        return res.status(409).json({
+          success: false,
+          error: error.message,
+        });
+      }
     }
-    if (error.code === 'UNAUTHORIZED') {
-      return res.status(403).json({ error: error.message });
-    }
-    if (error.code === 'CONFLICT') {
-      return res.status(409).json({ error: error.message });
-    }
-    
-    console.error('Accept request error:', error);
-    return res.status(500).json({ error: 'Failed to accept friend request' });
+
+    // Unexpected server error
+    console.error("Accept request error:", error);
+
+    return res.status(500).json({
+      success: false,
+      error: "Failed to accept friend request",
+    });
   }
 };
 

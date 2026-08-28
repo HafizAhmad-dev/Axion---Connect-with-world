@@ -1,7 +1,5 @@
 import type { Request, Response } from "express";
-import { mockContacts } from "../mockData/MockContacts.data.js";
-import { mockUsers } from "../mockData/mockAppUsers.data.js";
-import { friendRequests } from "../mockData/requests.data.js";
+
 import {getUserByIdModel, searchUsersMODEL} from "../../database/models/users.model.js";
 
 export const searchUsers = async (req: Request, res: Response) => {

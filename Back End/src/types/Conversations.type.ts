@@ -16,3 +16,4 @@ export interface Settings {
   isPinned?: boolean;
   isArchived?: boolean;
 }
+

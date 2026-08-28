@@ -5,10 +5,10 @@ interface Users {
   username: string;
   displayName: string;
   createdAt: string;
-  status: 'friend' | 'none' | 'pending_sent' | 'pending_received';
+  status: "friend" | "none" | "pending_sent" | "pending_received";
 }
 
-export  async function searchUsersMODEL(
+export async function searchUsersMODEL(
   query: string,
   userId: string,
 ): Promise<Users[]> {
@@ -18,12 +18,13 @@ export  async function searchUsersMODEL(
       u.username, 
       u.displayname, 
       u.createdAt,
-      CASE 
-        WHEN f.id IS NOT NULL THEN 'friend'
-        WHEN r.id IS NULL THEN 'none'
-        WHEN r.from_user_id = $2 THEN 'pending_sent'
-        WHEN r.to_user_id = $2 THEN 'pending_received'
-      END AS status
+      CASE
+  WHEN f.id IS NOT NULL THEN 'friend'
+  WHEN r.id IS NULL THEN 'none'
+  WHEN r.from_user_id = $2 THEN 'pending_sent'
+  WHEN r.to_user_id = $2 THEN 'pending_received'
+  ELSE 'none'
+END AS status
     FROM users u 
     LEFT JOIN friendships f ON 
       (f.user_id = $2 AND f.friend_id = u.id) OR 
@@ -45,7 +46,6 @@ export  async function searchUsersMODEL(
   }
 }
 
-
 export async function getUserByIdModel(id: string) {
   try {
     const query = `
@@ -59,10 +59,10 @@ export async function getUserByIdModel(id: string) {
       WHERE id = $1
     `;
     const result = await pool.query(query, [id]);
-    
+
     return result.rows[0] || null;
   } catch (error) {
-    console.error('Error fetching user by ID:', error);
-    throw new Error('Failed to fetch user');
+    console.error("Error fetching user by ID:", error);
+    throw new Error("Failed to fetch user");
   }
 }

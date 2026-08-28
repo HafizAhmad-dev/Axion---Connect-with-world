@@ -1,13 +1,18 @@
 import { Pool } from "pg";
+import "dotenv/config";
+
+// const pool = new Pool({
+//   user: "postgres",
+//   host: "localhost",
+//   database: "Axion Database",
+//   password: "ahmad1234",
+//   port: 5432,
+// });
 
 const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "Axion Database",
-  password: "ahmad1234",
-  port: 5432,
+  connectionString: process.env.DATABASE_URL,
 });
-
+console.log('url',process.env.DATABASE_URL)
 // Test connection on startup
 pool.connect((err, client, release) => {
   if (err) {

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const highlights_controller_1 = require("../controllers/highlights.controller");
+const router = (0, express_1.Router)();
+router.post('/create', highlights_controller_1.createHighlight);
+router.post('/:highlightId/view', highlights_controller_1.viewHighlight);
+router.get('/', highlights_controller_1.retrieveHighlights);
+router.get('/me', highlights_controller_1.retrieveUserHighlights);
+exports.default = router;

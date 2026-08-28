@@ -3,10 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pool from "../database/db.conn.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const migrationsDir = path.join(__dirname, "migrations");
+const migrationsDir = path.join(process.cwd(), "database", "migrations");
 
 async function migrate() {
   const client = await pool.connect();

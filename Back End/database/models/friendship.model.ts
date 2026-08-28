@@ -6,6 +6,15 @@ interface AcceptRequestResult {
   friendId: string;
 }
 
+
+
+export interface FriendPreview {
+  id: string;
+  username: string;
+  displayName: string;
+  friendsSince: string;
+}
+
 export async function acceptFriendRequest(requestId: string, currentUserId: string): Promise<AcceptRequestResult> {
   const client = await pool.connect();
   
@@ -56,5 +65,44 @@ export async function acceptFriendRequest(requestId: string, currentUserId: stri
     
   } finally {
     client.release();
+  }
+}
+
+
+
+export async function getFriendsModel(
+  userId: string,
+  query: string,
+): Promise<FriendPreview[]> {
+  const dbquery = `
+    SELECT
+      u.id,
+      u.username,
+      u.displayName,
+      f.created_at AS "friendsSince"
+    FROM friendships f
+    JOIN users u
+      ON u.id = CASE
+        WHEN f.user_id = $1 THEN f.friend_id
+        ELSE f.user_id
+      END
+    WHERE
+      (f.user_id = $1 OR f.friend_id = $1)
+      AND (
+        u.username ILIKE $2
+        OR u.displayName ILIKE $2
+      )
+    ORDER BY f.created_at DESC
+  `;
+
+  const values = [userId, `%${query}%`];
+
+  try {
+    const result = await pool.query<FriendPreview>(dbquery, values);
+
+    return result.rows;
+  } catch (error) {
+    console.error("Error fetching friends:", error);
+    throw error;
   }
 }

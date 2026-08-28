@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { handleValidation } from "../utils/handleValidatin.js";
 import bcrypt from "bcrypt";
-import { mockUsers } from "../mockData/mockAppUsers.data.js";
 import { signToken } from "../utils/jwtToken.hook.js";
 import { createUser, SignModule, verifyUserMODULE } from "../../database/models/userAuth.model.js";
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10;

@@ -1,6 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/jwtToken.hook.js";
-import { mockUsers } from "../mockData/mockAppUsers.data.js";
 import { verifyUserMODULE } from "../../database/models/userAuth.model.js";
 
 export const authMiddleware = async (

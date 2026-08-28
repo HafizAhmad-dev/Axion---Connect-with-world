@@ -1,6 +1,26 @@
 {
   "compilerOptions": {
-    "typeRoots": ["./node_modules/@types", "./@types"],
-    
-  }
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+
+    "rootDir": ".",
+    "outDir": "dist",
+
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "app.ts",
+    "src/**/*.ts",
+    "database/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
 }
