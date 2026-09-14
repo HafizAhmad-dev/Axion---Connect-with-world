@@ -95,7 +95,7 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ message: 'Resource not found', path: req.originalUrl });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
