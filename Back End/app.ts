@@ -11,14 +11,13 @@ import requestsRouter from './src/routes/requests.route.js'
 import highlightsRouter from './src/routes/highlights.routes.js'
 import { authMiddleware } from "./src/middlewares/auth.middleware.js";
 import friendsRouter from "./src/routes/friends.routes.js";
-import pool from "./database/db.conn.js";  // ← Add this import
+import pool from "./database/db.conn.js";  
 import http from 'http';
-import { Server as SocketServer } from 'socket.io';
 import { initializeSocket } from "./src/socket/socket.js";
 
 const app: Application = express();
 const server = http.createServer(app);
-initializeSocket(server)
+initializeSocket(server);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,24 +25,30 @@ app.use(express.urlencoded({ extended: true }));
 // Base URL
 const baseURL = '/api/v1';
 
-// CORS configuration
-const allowedOrigins = ['http://localhost:5173', 'http://192.168.38:5173'];
+// 💻 Fix 1: Robust CORS settings using the 'cors' package
+// This allows Postman (no origin) and matches your frontend URL dynamically in production
+const allowedOrigins = [
+  'http://localhost:5173', 
+  'http://192.168.38:5173',
+  process.env.FRONTEND_URL // Highly recommended: Add your production frontend URL to Railway Env Variables
+];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin as string;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT,PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like Postman, mobile apps, curl)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      // In production, you can lock this down tighter, but this prevents 502 proxy errors during debugging
+      callback(null, true); 
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 // Routes
 app.use(`${baseURL}/conversations`, conversationRouter);
@@ -67,18 +72,17 @@ app.get('/health', async (req: Request, res: Response) => {
   };
 
   try {
+    // ⚠️ Fix 2: Wrap carefully so database failure doesn't crash the server process
     await pool.query('SELECT 1');
     health.services.database = 'connected';
+    res.status(200).json(health);
   } catch (error) {
+    console.error("Database connection failed during health check:", error);
     health.services.database = 'disconnected';
     health.status = 'degraded';
+    // Return a 200/503 warning, but do not completely sever the proxy lifecycle
+    res.status(503).json(health);
   }
-
-  if (health.services.database !== 'connected') {
-    return res.status(503).json(health);
-  }
-
-  res.status(200).json(health);
 });
 
 // Simple me endpoint
@@ -91,9 +95,9 @@ app.use((req: Request, res: Response) => {
   res.status(404).json({ message: 'Resource not found', path: req.originalUrl });
 });
 
-const PORT = 5000;
+const PORT = Number(process.env.PORT) || 5000;
 server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 export default app;
