@@ -33,7 +33,9 @@ export const authMiddleware = async (
       id: user.id,
       displayName:user.displayName,
       username:user.username,
-      email:user.email
+      email:user.email,
+      createdAt:user.createdAt,
+      updatedAt:user.updatedAt
     };
 
     next();

@@ -54,9 +54,10 @@ export async function verifyUserMODULE(
   displayName: string;
   email: string;
   createdAt: string;
+  updatedAt: string;
 } | null> {
   const query =
-    "SELECT id, username, displayName, email, createdAt FROM users WHERE id = $1 ";
+    "SELECT id, username, displayName, email, createdAt, updatedAt FROM users WHERE id = $1 ";
   const value = [id];
 
   try {

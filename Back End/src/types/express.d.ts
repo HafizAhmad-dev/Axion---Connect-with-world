@@ -9,6 +9,8 @@ declare global {
         displayName:string;
         username:string;
         email:string;
+        createdAt:string;
+        updatedAt:string;
       }
     }
   }
