@@ -1,4 +1,3 @@
-import { BsThreeDots } from "react-icons/bs";
 import LogoutButton from "./LogoutBtn";
 const Header = () => {
     return (

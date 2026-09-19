@@ -10,3 +10,14 @@ export interface Message {
   isRead: boolean;
   status: MessageStatus;
 }
+
+
+export interface ApiMessagesResponse {
+  success: boolean;
+  messages: Message[];
+}
+
+export interface SendMessageApiResponse {
+  success: boolean;
+  message: Message;
+}

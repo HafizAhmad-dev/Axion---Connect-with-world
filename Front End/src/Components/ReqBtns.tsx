@@ -70,12 +70,12 @@ const ReqBtns = ({ variant, reqId, onActionComplete }: Props) => {
   async function handleAction() {
     try {
       if (variant === "accept") {
-        const res = await apiFetch(`/api/v1/requests/acceptRequest/`, {
+        const res = await apiFetch<AcceptFuncitonAPIResponse>(`/api/v1/requests/acceptRequest/`, {
           method: "PATCH",
           body: JSON.stringify({ reqId }),
         });
 
-        const data: AcceptFuncitonAPIResponse = await res.data;
+        const data: AcceptFuncitonAPIResponse =  res.data;
 
         if (data.success) {
           triggerAlert(data.message || "Request accepted");
@@ -86,12 +86,12 @@ const ReqBtns = ({ variant, reqId, onActionComplete }: Props) => {
       }
 
       if (variant === "decline") {
-        const res = await apiFetch(`/api/v1/requests/declineRequest`, {
+        const res = await apiFetch<AcceptFuncitonAPIResponse>(`/api/v1/requests/declineRequest`, {
           method: "PATCH",
           body: JSON.stringify({ reqId }),
         });
 
-        const data: AcceptFuncitonAPIResponse = await res.data;
+        const data =  res.data;
 
         if (data.success) {
           triggerAlert(data.message || "Request declined");

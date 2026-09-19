@@ -4,7 +4,6 @@ import PhotoHolder from "./PhotoHolder";
 import HighLightView from "./HighLightView";
 
 import type { Highlight } from "../Types/Highlights.types";
-import { CloudCog } from "lucide-react";
 
 type Props = {
   id: string; //it is the friendId

@@ -3,7 +3,6 @@ import { apiFetch } from "../utils/api";
 
 const useInternetConnection = () => {
   const [online, setOnline] = useState(navigator.onLine);
-  const   API_URL: string = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     const verifyConnection = async () => {

@@ -1,3 +1,5 @@
+import type { UserType } from "./User.type";
+
 export interface FormState {
   username: string;
   displayName: string;
@@ -29,4 +31,10 @@ export interface FieldErrors {
 export interface GeneralError {
   code: number | null;
   message: string;
+}
+
+export interface RegisterApiResponse {
+  message: string;
+  User: UserType;
+  token: string;
 }

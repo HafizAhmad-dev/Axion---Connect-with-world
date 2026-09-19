@@ -9,29 +9,31 @@ import axios from "axios";
 import { selectUser } from "../Store/Slices/UserSlice";
 import { setCurrentConversation } from "../Store/Slices/Conversations.slice";
 import { apiFetch } from "../utils/api";
-
+import type { SendFriendRequestResponse, AcceptRequestResponse } from "../Types/Request.type";
+import type { GetConversationResponse } from "../Types/Conversation.type";
+import type { SearchUsersResponse } from "../Types/User.type";
 // ✅ Updated User type to match backend status values
 type User = {
   id: string;
   username: string;
   displayName?: string;
-  avatar: string;
+  // avatar: string;
   createdAt: Date | string;
   status: "none" | "friend" | "pending_sent" | "pending_received";
 };
 
-type ApiResponse = {
-  success: boolean;
-  data: User[];
-  message?: string;
-};
+// type ApiResponse = {
+//   success: boolean;
+//   data: User[];
+//   message?: string;
+// };
 
 type UsersListProps = {
   query: string;
   setQuery: (value: string) => void;
 };
 
-const API_VERSION = import.meta.env.VITE_API_VERSION;
+const apiUrl = import.meta.env.VITE_API_URL;
 
 const UsersList = ({ query }: UsersListProps) => {
   const currentUser = useSelector(selectUser);
@@ -84,17 +86,17 @@ const UsersList = ({ query }: UsersListProps) => {
     setUsersError(null);
 
     try {
-      const res = await apiFetch(
-        `/${API_VERSION}/users/search?q=${encodeURIComponent(query)}`,
+      const res = await apiFetch<SearchUsersResponse>(
+        `${apiUrl}/users/search?q=${encodeURIComponent(query)}`,
         { signal },
       );
-      const data: ApiResponse = res.data;
 
-      if (data.success) {
-        setUsers(data.data);
+      if (res.data.success) {
+        console.log(res.data.data)
+        setUsers(res.data.data);
       } else {
         setUsers([]);
-        setUsersError(data.message || "No users found");
+        setUsersError(res.data.message || "No users found");
       }
     } catch (error) {
       // Don't set error if request was aborted
@@ -131,18 +133,21 @@ const UsersList = ({ query }: UsersListProps) => {
     );
 
     try {
-      const res = await apiFetch(`/${API_VERSION}/requests/send`, {
-        method: "POST",
-        body: JSON.stringify({
-          from: currentUser.id,
-          to: toId,
-        }),
-      });
+      const res = await apiFetch<SendFriendRequestResponse>(
+        `${apiUrl}/requests/send`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            from: currentUser.id,
+            to: toId,
+          }),
+        },
+      );
 
       if (!res.data.success) {
         // Revert on failure
         setUsers(previousUsers);
-        console.error("Failed to send request:", res.data.message);
+        console.error("Failed to send request:", res.data?.text);
       }
     } catch (error) {
       // Revert on error
@@ -168,7 +173,7 @@ const UsersList = ({ query }: UsersListProps) => {
     );
 
     try {
-      const res = await apiFetch(`/${API_VERSION}/requests/accept`, {
+      const res = await apiFetch<AcceptRequestResponse>(`/${apiUrl}/requests/accept`, {
         method: "POST",
         body: JSON.stringify({
           userId: currentUser.id,
@@ -216,16 +221,18 @@ const UsersList = ({ query }: UsersListProps) => {
   const openConversation = async (user: User) => {
     try {
       // Get or create conversation with this user
-      const response = await apiFetch(
-        `/${API_VERSION}/conversations/with/${user.id}`,
+      const response = await apiFetch<GetConversationResponse>(
+        `/${apiUrl}/conversations/with/${user.id}`,
       );
-      const { conversation } = response.data;
+      
+      if(response.data.success && response.data.conversation){
+        dispatch(setCurrentConversation(response.data.conversation));
+      };
 
       // Store in Redux
-      dispatch(setCurrentConversation(conversation));
 
       // Navigate to chat page
-      navigate(`/user/chat/${conversation.id}`);
+      navigate(`/user/chat/${response.data.conversation.id}`);
     } catch (error) {
       console.error("Failed to open conversation:", error);
     }
@@ -267,7 +274,7 @@ const UsersList = ({ query }: UsersListProps) => {
             <div
               key={user.id}
               onClick={() => {
-                if(user.status === 'friend'){
+                if (user.status === "friend") {
                   openConversation(user);
                 }
               }}

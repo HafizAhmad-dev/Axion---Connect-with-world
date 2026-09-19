@@ -8,9 +8,9 @@ export interface Highlight {
   mediaUrl: string | null;
   caption: string | null;
   createdAt: string;
-  background:string;
   expiresAt: string;
   viewed: boolean;
+  background: string | null;
 }
 
 export interface FriendHighlights {
@@ -23,11 +23,13 @@ export interface FriendHighlights {
 export interface GetHighlightsResponse {
   highlights: FriendHighlights[];
 }
-export interface userHighlightsResponse {
+
+export interface UserHighlightsResponse {
   highlights: Highlight[];
 }
-export interface highlightTextPostData {
-  caption: string,
-  background:string,
-  type:'text'
+
+export interface HighlightTextPostData {
+  caption: string;
+  background: string;
+  type: "text";
 }

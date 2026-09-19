@@ -14,15 +14,15 @@ interface HighLightViewProps {
 }
 
 interface HighlightDetails {
-  displayName:string,
-  username:string,
-  time: string,
+  displayName: string;
+  username: string;
+  time: string;
 }
 
 const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
   const dispatch = useDispatch();
 
-  const user = useSelector((state:RootState) => state.user.user);
+  const user = useSelector((state: RootState) => state.user.user);
   // Friend data — only needed when viewing someone else's highlights
   const friend = useSelector((state: RootState) =>
     state.highlights.friendsHighlights.find((fh) => fh.userId === ownerId),
@@ -217,19 +217,18 @@ const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
     return `${dateString}, ${timeString}`;
   }
 
-const highlightDetails: HighlightDetails = {
-  displayName:
-    owner === "self"
-      ? user?.displayName ?? "You"
-      : friend?.displayName ?? "",
+  const highlightDetails: HighlightDetails = {
+    displayName:
+      owner === "self"
+        ? //  ? user?.displayName ??
+          "You"
+        : (friend?.displayName ?? ""),
 
-  username:
-    owner === "self"
-      ? user?.username ?? ""
-      : friend?.username ?? "",
+    username:
+      owner === "self" ? (user?.username ?? "") : (friend?.username ?? ""),
 
-  time: formatTime(currentHighlight.createdAt),
-};
+    time: formatTime(currentHighlight.createdAt),
+  };
   return (
     <div
       className={`fixed inset-0 z-99 flex flex-col justify-center items-center bg-$ bg-cover bg-center`}
@@ -261,21 +260,19 @@ const highlightDetails: HighlightDetails = {
           );
         })}
       </div>
-     <div className="details absolute top-9 left-10 text-white">
-  <div className="flex items-center gap-2">
-    <h3 className="text-2xl mb-0 leading-none font-bold pb-0">
-      {highlightDetails.displayName}
-    </h3>
+      <div className="details absolute top-9 left-10 text-white">
+        <div className="flex items-center gap-2">
+          <h3 className="text-2xl mb-0 leading-none font-bold pb-0">
+            {highlightDetails.displayName}
+          </h3>
 
-    <p className="time">
-      {highlightDetails.time}
-    </p>
-  </div>
+          <p className="time">{highlightDetails.time}</p>
+        </div>
 
-  <h4 className="pb-0 mb-0 leading-none text-sm">
-    @{highlightDetails.username}
-  </h4>
-</div>
+        <h4 className="pb-0 mb-0 leading-none text-sm">
+          @{highlightDetails.username}
+        </h4>
+      </div>
       {/* Text highlight */}
       {currentHighlight.type === "text" && (
         <p className="text-white text-center text-3xl font-semibold drop-shadow-lg px-4 max-w-[90%] wrap-break-word">

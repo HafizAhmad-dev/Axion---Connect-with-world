@@ -21,3 +21,11 @@ export interface Conversation {
   createdAt: string | Date;
   updatedAt: string | Date;
 }
+
+export interface GetConversationResponse {
+  success: true;
+  conversation: Conversation;
+}
+export interface GetConversationsResponse {
+  conversations: Conversation[];
+}

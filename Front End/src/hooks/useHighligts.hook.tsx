@@ -3,9 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {  type RootState } from "../Store/store";
 import { useEffect } from "react";
 import { apiFetch } from "../utils/api";
-import type { GetHighlightsResponse, userHighlightsResponse } from "../Types/Highlights.types";
+import type { GetHighlightsResponse, UserHighlightsResponse } from "../Types/Highlights.types";
 import { setFriendsHighlights, setUserHighligths } from "../Store/Slices/Highlights.slice";
-import type { Highlight } from "../Types/Highlights.types";
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export const useHighlights = () => {
@@ -38,7 +37,7 @@ export const useHighlights = () => {
 
      async function fetchHighlights() {
       try {
-        const response = await apiFetch<userHighlightsResponse>(
+        const response = await apiFetch<UserHighlightsResponse>(
           `${apiUrl}/highlights/me`,
         );
         dispatch(setUserHighligths(response.data.highlights))

@@ -5,6 +5,9 @@ import { apiFetch } from "../utils/api";
 import RequestBox from "../Components/RequestBox";
 import { Inbox, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+
+const apiUrl = import.meta.env.VITE_API_URL;
 
 type FriendRequest = {
   id: string;
@@ -42,9 +45,10 @@ const RequestsPage = () => {
 
     setLoading(true);
     try {
-      const res = await apiFetch(`/api/v1/requests/getReqs/`);
-      const data: RequestsResponse = await res.data;
-
+      const res = await apiFetch<RequestsResponse>(
+        `${apiUrl}/requests/getReqs/`,
+      );
+      const data = res.data;
       if (data.success && Array.isArray(data.reqs)) {
         const formattedRequests: FriendRequest[] = data.reqs.map((req) => ({
           id: req.id,
@@ -52,14 +56,26 @@ const RequestsPage = () => {
           displayName: req.displayname,
           joinedAt: new Date(req.created_at || req.createdat || Date.now()),
           requestType: req.request_type as "sent" | "received",
-          status: (req.status as "pending" | "rejected" | "accepted") || "pending",
+          status:
+            (req.status as "pending" | "rejected" | "accepted") || "pending",
         }));
         setRequests(formattedRequests);
       } else {
         console.error("Failed to fetch requests:", data);
       }
     } catch (error) {
-      console.error("Error fetching requests:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Status:", error.response?.status);
+        console.error("Response:", error.response?.data);
+        console.error("URL:", error.config?.url);
+        console.error("Method:", error.config?.method);
+        console.error(
+          "Full URL:",
+          error.config ? axios.getUri(error.config) : "Unknown",
+        );
+      } else {
+        console.log("failed with error", error);
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -79,17 +95,17 @@ const RequestsPage = () => {
   }, [user]);
 
   const filteredRequests = requests.filter(
-    (req) => req.requestType === activeTab
+    (req) => req.requestType === activeTab,
   );
   const getRequestCount = (type: "sent" | "received") => {
     return requests.filter(
-      (req) => req.requestType === type && req.status === "pending"
+      (req) => req.requestType === type && req.status === "pending",
     ).length;
   };
 
   const buttonVariants = {
     inactive: { scale: 1 },
-    active: { scale: 1.02 }
+    active: { scale: 1.02 },
   };
 
   return (
@@ -227,6 +243,16 @@ const RequestsPage = () => {
                     type={req.requestType}
                     status={req.status}
                     joinedAt={req.joinedAt}
+                    onAccepted={(requestId) => {
+                      setRequests((prev) =>
+                        prev.filter((request) => request.id !== requestId),
+                      );
+                    }}
+                    onAction={() => {
+                      setRequests((prev) =>
+                        prev.filter((request) => request.id !== req.id),
+                      );
+                    }}
                   />
                 </motion.div>
               ))}

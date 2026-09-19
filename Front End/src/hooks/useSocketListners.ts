@@ -15,7 +15,7 @@ export const useSocketListeners = () => {
       return console.log("Cannot configure sockets");
     }
 
-    const cleanup = setupSocketListners(dispatch, socket, user);
+    const cleanup = setupSocketListners(dispatch, socket);
 
     return cleanup;
   }, [[socket, isConnected, user, dispatch]]);

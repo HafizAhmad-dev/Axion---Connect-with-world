@@ -10,8 +10,9 @@ import type {
   PasswordValidation,
   FieldErrors,
   GeneralError,
+  RegisterApiResponse,
 } from "../Types/Register.types";
-import { saveUser } from "../services/localStorageService";
+import type { UserType } from "../Types/User.type";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -115,17 +116,17 @@ export const useRegister = () => {
     };
 
     try {
-      const response = await apiFetch(`${API_URL}/auth/register`, {
+      const response = await apiFetch<RegisterApiResponse>(`${API_URL}/auth/register`, {
         method: "POST",
         body: JSON.stringify(payload),
       });
      
       localStorage.setItem("token", response.data.token);
 
-      const userResponse = await apiFetch(`${API_URL}/auth/me`);
+      const userResponse = await apiFetch<UserType>(`${API_URL}/auth/me`);
       const userData = userResponse.data;
 
-      dispatch(setUser(userData.user));
+      dispatch(setUser(userData));
 
       navigate("/");
     } catch (error) {

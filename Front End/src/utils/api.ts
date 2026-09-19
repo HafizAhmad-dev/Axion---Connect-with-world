@@ -10,6 +10,8 @@ interface ApiOptions {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   headers?: Record<string, string>;
+  signal?: AbortSignal;
+  cache?: RequestCache;
 }
 
 // Create axios instance
@@ -30,7 +32,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response interceptor - handle 401 globally
@@ -39,21 +41,19 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
-    
     if (error.response?.status === 401) {
-      
       // Clear storage
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      
+
       store.dispatch(logoutUser());
-      
+
       if (!window.location.pathname.includes("/auth/")) {
         window.location.href = "/auth/login";
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Wrapper function for easy use

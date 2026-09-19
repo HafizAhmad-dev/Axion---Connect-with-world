@@ -23,6 +23,7 @@ import { setMessages } from "./Store/Slices/Messages.slice";
 import { useSocketListeners } from "./hooks/useSocketListners";
 import { useSocketEmitters } from "./services/useSocketEmitters";
 import type { RootState } from "./Store/store";
+import type { AuthMeResponse } from "./Types/User.type";
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_URL
 
@@ -56,7 +57,7 @@ const App = () => {
       }
 
       try {
-        const response = await apiFetch(`${VITE_API_BASE_URL}/auth/me`);
+        const response = await apiFetch<AuthMeResponse>(`${VITE_API_BASE_URL}/auth/me`);
         const data = response.data;
         if (data.success) {
           dispatch(setUser(data.user));

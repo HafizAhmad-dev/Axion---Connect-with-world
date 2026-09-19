@@ -2,47 +2,53 @@ import { Check, X, Clock, UserCheck, Calendar } from "lucide-react";
 import PhotoHolder from "./PhotoHolder";
 import { useState } from "react";
 import { apiFetch } from "../utils/api";
+import type { AcceptRequestResponse } from "../Types/Request.type";
 
-type Props = {
+
+interface RequestBoxProps {
   id: string;
   username: string;
   displayName?: string;
-  mutualFriends?: number;
   time: Date;
   type: "sent" | "received";
-  joinedAt: string | Date;
-  status: "pending" | "accepted" | "rejected";
-  onAction?: () => void;
-};
+  status: "pending" | "rejected" | "accepted";
+  joinedAt: Date;
+onAction:() => void;
+  onAccepted: (requestId: string) => void;
+}
 
-const RequestBox = ({ 
-  id, 
-  username, 
-  displayName, 
-  mutualFriends, 
-  time, 
-  type, 
-  joinedAt, 
+const RequestBox = ({
+  id,
+  username,
+  displayName,
+  time,
+  type,
   status,
-  onAction 
-}: Props) => {
+  joinedAt,
+  onAction,
+  onAccepted,
+}: RequestBoxProps) => {
   const [loading, setLoading] = useState(false);
 
-  const handleAccept = async () => {
-    setLoading(true);
-    try {
-     const response = await apiFetch(`/api/v1/requests/acceptRequest`, {
-        method: "PATCH",
-        body: JSON.stringify({ requestId: id }),
-      });
-      console.log(response.data)
-      
-    } catch (error) {
-      console.error("Failed to accept request:", error);
-    } finally {
-      setLoading(false);
+const handleAccept = async () => {
+  try {
+    const res = await apiFetch<AcceptRequestResponse>(
+      "/api/v1/requests/accept",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          requestId: id,
+        }),
+      }
+    );
+
+    if (res.data.success) {
+      onAccepted(id);
     }
-  };
+  } catch (error) {
+    console.error("Failed to accept request:", error);
+  }
+};
 
   const handleReject = async () => {
     setLoading(true);
@@ -83,7 +89,8 @@ const RequestBox = ({
 
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins} min ago`;
-    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+    if (diffHours < 24)
+      return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
     if (diffDays === 1) return "Yesterday";
     if (diffDays < 7) return `${diffDays} days ago`;
     return date.toLocaleDateString();
@@ -122,12 +129,12 @@ const RequestBox = ({
           <div className="flex items-center gap-1 text-xs text-gray-400 mt-1">
             <Clock size={12} />
             <span>{formatRelativeTime(time)}</span>
-            {mutualFriends && mutualFriends > 0 && (
+            {/* {mutualFriends && mutualFriends > 0 && (
               <>
                 <span className="mx-1">•</span>
                 <span>{mutualFriends} mutual friends</span>
               </>
-            )}
+            )} */}
           </div>
 
           {/* Joined date - When user joined the platform */}
@@ -144,7 +151,7 @@ const RequestBox = ({
                   <button
                     onClick={handleAccept}
                     disabled={loading}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-medium rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-linear-to-r from-green-500 to-green-600 text-white text-sm font-medium rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Check size={16} />
                     <span>Accept</span>

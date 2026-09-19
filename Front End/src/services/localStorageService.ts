@@ -1,6 +1,5 @@
 import type { Message } from "../Types/Message.type";
 import type { Conversation, Participant } from "../Types/Conversation.type";
-import type { Friend } from "../Types/Friend.type";
 
 // ============ Storage Keys ============
 const STORAGE_KEYS = {

@@ -1,14 +1,14 @@
 import { useSelector } from "react-redux";
 import type { RootState } from "../Store/store";
 import React from "react";
-import type { Status } from "../Types/Message.type";
+import type { MessageStatus } from "../Types/Message.type";
 
 interface ChatBubbleProps {
   username: string;
   text: string;
   time: string;
   senderId: string;
-  status: Status;
+  status: MessageStatus;
 }
 
 export default React.memo(function ChatBubble({
@@ -18,7 +18,7 @@ export default React.memo(function ChatBubble({
   senderId,
   status,
 }: ChatBubbleProps) {
-  const appUserId = useSelector((state: RootState) => state.user.id);
+  const appUserId = useSelector((state: RootState) => state.user.user?.id);
   const isOwnMsg = senderId === appUserId;
 
   return (

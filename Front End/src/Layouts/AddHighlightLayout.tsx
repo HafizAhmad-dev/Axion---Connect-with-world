@@ -3,7 +3,7 @@ import { Outlet, useNavigate } from "react-router";
 import { useState } from "react";
 
 import type {
-  highlightTextPostData,
+  HighlightTextPostData,
   HighlightType,
 } from "../Types/Highlights.types";
 import { apiFetch } from "../utils/api";
@@ -59,7 +59,7 @@ const AddHighlightLayout = () => {
     if (!canShare) return;
 
     if (highlightType === "text") {
-      const reqData: highlightTextPostData = {
+      const reqData: HighlightTextPostData = {
         caption: text,
         background: bgColor,
         type: highlightType,

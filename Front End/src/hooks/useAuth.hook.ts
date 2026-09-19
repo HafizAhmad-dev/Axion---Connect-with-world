@@ -20,12 +20,12 @@ export const useAuth = () => {
     }
 
     try {
-      const res = await apiFetch(`${API_URL}/auth/me`, {
+      const res = await apiFetch<{ user: UserType }>(`${API_URL}/auth/me`, {
         method: "GET",
       });
 
   
-      const data: { user: UserType } = await res.data;
+      const data =  res.data;
       dispatch(setUser(data.user));
     } catch {
       // dispatch(logoutUser());

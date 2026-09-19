@@ -1,12 +1,16 @@
+
 import { Outlet } from "react-router";
+
 import Header from "../Components/Header";
 import Navbar from "../Components/Navbar";
 import { useAuth } from "../hooks/useAuth.hook";
 
 const Layout = () => {
-  const { checking } = useAuth();
+  const { isAuthChecked } = useAuth();
 
-  if (checking) return <p>Checking authorization...</p>;
+  if (!isAuthChecked) {
+    return <p>Checking authorization...</p>;
+  }
 
   return (
     <div className="h-screen w-screen flex flex-col">

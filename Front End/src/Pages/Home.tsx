@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
-import type { Conversation, Participant } from "../Types/Conversation.type";
+import type { Conversation, GetConversationsResponse, Participant } from "../Types/Conversation.type";
 import {
   setConversations,
   setCurrentConversation,
@@ -15,7 +15,6 @@ import PhotoHolder from "../Components/PhotoHolder";
 import SearchUser from "../Components/SearchUser.input";
 import AnimatedSearchPanel from "../Components/AnimatedSearchPanel";
 import { saveCurrentConversation } from "../services/localStorageService";
-import { useSocket } from "../hooks/useSocket";
 const API_URL = import.meta.env.VITE_API_URL;
 
 const Home = () => {
@@ -32,9 +31,6 @@ const Home = () => {
   const conversations = useSelector(
     (state: RootState) => state.conversations.conversations,
   );
-  const messages = useSelector((state: RootState) => state.messages);
-
-
 
   // ========== Fetch all conversations ==========
   useEffect(() => {
@@ -43,9 +39,10 @@ const Home = () => {
     async function fetchConversations() {
       setLoading(true);
       try {
-        const response = await apiFetch(`${API_URL}/conversations`);
-        const data: Conversation[] =
-          response.data.conversations || response.data;
+        const response = await apiFetch<GetConversationsResponse>(
+          `${API_URL}/conversations`,
+        );
+        const data = response.data.conversations || response.data;
         dispatch(setConversations(data));
       } catch (err) {
         console.error("Failed to fetch conversations: a", err);
@@ -56,8 +53,6 @@ const Home = () => {
 
     fetchConversations();
   }, [user, dispatch]);
-
-
 
   // ========== Open chat ==========
   const openChat = (conversation: Conversation) => {
@@ -167,10 +162,9 @@ const Home = () => {
           </div>
         )}
 
-
         {!loading &&
           conversations.length > 0 &&
-        conversations.map((convo) => {
+          conversations.map((convo) => {
             const displayName = getDisplayName(convo);
 
             return (

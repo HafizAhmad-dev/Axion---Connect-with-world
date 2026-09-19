@@ -9,8 +9,9 @@ import useInternetConnection from "../hooks/InternetStatus.hook";
 import { useSocket } from "../hooks/useSocket";
 
 import type { RootState } from "../Store/store";
-import type { Message } from "../Types/Message.type";
+import type { Message, SendMessageApiResponse } from "../Types/Message.type";
 import type { Participant } from "../Types/Conversation.type";
+import type { ApiMessagesResponse } from "../Types/Message.type";
 
 import { apiFetch } from "../utils/api";
 
@@ -38,7 +39,6 @@ import {
 import { Send, Database, ArrowDown } from "lucide-react";
 import { setActiveConversation } from "../services/socketEmittersService";
 
-const apiVersion = import.meta.env.VITE_API_VERSION;
 const EMPTY: Message[] = [];
 const INVALID = "noConversation";
 
@@ -72,7 +72,7 @@ const ChatLayout = () => {
 
   const appUserId = useSelector((s: RootState) => s.user.user?.id);
 
-  const conversationId = currentConversation?.id
+  const conversationId = currentConversation?.id;
 
   // RESET NEW MESSAGES COUNT
   useEffect(() => {
@@ -120,16 +120,15 @@ const ChatLayout = () => {
   //   recover();
   // }, []);
 
-  useEffect(()=> {
-    if(socket && conversationId && conversationId !== INVALID) {
-      setActiveConversation(socket,  conversationId);
-       return () => {
-      setActiveConversation(socket, null);
-    };
+  useEffect(() => {
+    if (socket && conversationId && conversationId !== INVALID) {
+      setActiveConversation(socket, conversationId);
+      return () => {
+        setActiveConversation(socket, null);
+      };
     }
+  }, [conversationId, socket]);
 
-  },[conversationId, socket]);
-  
   // ========== Set other user ==========
   useEffect(() => {
     if (!currentConversation?.participants || !appUserId) return;
@@ -173,8 +172,11 @@ const ChatLayout = () => {
 
     const fetch = async () => {
       try {
-        console.log("Fetching messages from API for conversation:", conversationId);
-        const res = await apiFetch(
+        console.log(
+          "Fetching messages from API for conversation:",
+          conversationId,
+        );
+        const res = await apiFetch<ApiMessagesResponse>(
           `/conversations/${conversationId}/messages`,
         );
 
@@ -227,7 +229,7 @@ const ChatLayout = () => {
     if (!online) return;
 
     try {
-      const res = await apiFetch(`/messages/${conversationId}`, {
+      const res = await apiFetch<SendMessageApiResponse>(`/messages/${conversationId}`, {
         method: "POST",
         body: JSON.stringify({
           conversationId,
