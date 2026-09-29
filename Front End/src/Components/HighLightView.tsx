@@ -172,6 +172,7 @@ const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
   }
 
   const currentHighlight = highlights[index];
+  console.log("currentHighlight", currentHighlight);
 
   useEffect(() => {
     if (owner === "other" && currentHighlight) {
@@ -231,9 +232,9 @@ const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
   };
   return (
     <div
-      className={`fixed inset-0 z-99 flex flex-col justify-center items-center bg-$ bg-cover bg-center`}
+      className={`fixed inset-0 z-99 flex flex-col justify-center items-center bg-[${currentHighlight.background ?? "black"}] bg-cover bg-center`}
       style={{
-        backgroundColor: currentHighlight.background ?? "black",
+        background  : currentHighlight.background ?? "black",
       }}
       onClick={handleClick}
       onPointerDown={() => setPaused(true)}
@@ -300,9 +301,9 @@ const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
       )}
 
       {/* Owner name */}
-      <p className="absolute bottom-8 text-white text-lg font-medium drop-shadow-md">
+      {/* <p className="absolute bottom-8 text-white text-lg font-medium drop-shadow-md">
         {owner === "self" ? "You" : friend?.displayName}
-      </p>
+      </p> */}
     </div>
   );
 };

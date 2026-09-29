@@ -35,7 +35,17 @@ async function SignModule(identifier) {
 }
 // verify user module
 async function verifyUserMODULE(id) {
-    const query = "SELECT id, username, displayName, email, createdAt, updatedAt FROM users WHERE id = $1 ";
+    const query = `
+  SELECT
+    id,
+    username,
+    displayname,
+    email,
+    createdat,
+    updatedat
+  FROM users
+  WHERE id = $1
+`;
     const value = [id];
     try {
         const result = await db_conn_1.default.query(query, value);

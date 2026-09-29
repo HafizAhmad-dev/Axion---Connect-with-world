@@ -6,13 +6,16 @@
   "author": "",
   "main": "app.ts",
   "scripts": {
-    "start": "node dist/app.js",
-    "dev": "tsx watch app.ts",
-        "build": "tsc",
-     "migrate": "tsx database/migrate.ts",
+    "start": "node --import ./src/middlewares/instrument.js dist/app.js",
+    "dev": "tsx watch --import ./src/middlewares/instrument.js  app.ts",
+    "build": "tsc",
+    "migrate": "tsx database/migrate.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "@sentry/cli": "^2.58.6",
+    "@sentry/node": "^11.0.0",
+    "@sentry/profiling-node": "^11.0.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
@@ -21,6 +24,7 @@
     "jsonwebtoken": "^9.0.3",
     "nodemon": "^3.1.11",
     "pg": "^8.21.0",
+    "pino": "^10.3.1",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3",
     "uuid": "^13.0.0"

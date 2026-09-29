@@ -2,7 +2,11 @@ import type { Request, Response } from "express";
 import { handleValidation } from "../utils/handleValidatin.js";
 import bcrypt from "bcrypt";
 import { signToken } from "../utils/jwtToken.hook.js";
-import { createUser, SignModule, verifyUserMODULE } from "../../database/models/userAuth.model.js";
+import {
+  createUser,
+  SignModule,
+  verifyUserMODULE,
+} from "../../database/models/userAuth.model.js";
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -21,7 +25,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     return res.status(201).json({
       message: "User registered successfully",
-      User:newUser,
+      User: newUser,
       token,
     });
   } catch (error: any) {
@@ -60,7 +64,7 @@ export const loginUser = async (req: Request, res: Response) => {
   if (handleValidation(req, res)) return;
 
   const { username, email, password } = req.body;
-  const identifier = username || email
+  const identifier = username || email;
   // Missing credentials
   if (!identifier || !password) {
     return res.status(400).json({
@@ -88,7 +92,6 @@ export const loginUser = async (req: Request, res: Response) => {
     });
   }
 
-
   const token = signToken({ userId: user.id });
 
   // Success
@@ -105,7 +108,7 @@ export const loginUser = async (req: Request, res: Response) => {
 };
 
 //for verifying the token and returning text(on order)
-export  const verifyUser = async (req: Request, res: Response) => {
+export const verifyUser = async (req: Request, res: Response) => {
   const userFromToken = (req as any).user;
   if (!userFromToken) {
     return res.status(401).json({
@@ -113,7 +116,6 @@ export  const verifyUser = async (req: Request, res: Response) => {
       message: "User not authenticated",
     });
   }
-
 
   return res.status(200).json({
     success: true,

@@ -7,6 +7,21 @@
 @import "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 
+@keyframes notification-progress {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.notification-progress {
+  transform-origin: left;
+  animation: notification-progress 5s linear forwards;
+}
+
 @theme {
   --font-hfont: 'HeadingFont';
   --font-gfont: 'Inter', sans-serif;

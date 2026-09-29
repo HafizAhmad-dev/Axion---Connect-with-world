@@ -4,6 +4,7 @@ import userReducer from './Slices/UserSlice';
 import conversationsReducer from './Slices/Conversations.slice';
 import messagesReducer from './Slices/Messages.slice';
 import highlightsReducer from './Slices/Highlights.slice';
+import errorReducer from './Slices/Errors.slice';
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     conversations: conversationsReducer, 
     messages: messagesReducer,
     highlights:highlightsReducer, 
+    error:errorReducer,
   },
 });
 

@@ -9,17 +9,28 @@ export const authMiddleware = async (
 ) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({
+      success: false,
+      message: "No token provided",
+    });
   }
 
   const token = authHeader.split(" ")[1];
 
-  try {
-    const decoded = verifyToken(token) as { userId: string };
-    const userId = decoded.userId;
+  let decoded: { userId: string };
 
-    const user = await verifyUserMODULE(userId);
+  try {
+    decoded = verifyToken(token) as { userId: string };
+  } catch {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+
+  try {
+    const user = await verifyUserMODULE(decoded.userId);
 
     if (!user) {
       return res.status(401).json({
@@ -28,21 +39,22 @@ export const authMiddleware = async (
       });
     }
 
-    // IMPORTANT: attach user to request
     req.user = {
       id: user.id,
-      displayName:user.displayName,
-      username:user.username,
-      email:user.email,
-      createdAt:user.createdAt,
-      updatedAt:user.updatedAt
+      displayName: user.displayName,
+      username: user.username,
+      email: user.email,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     };
 
     next();
   } catch (err) {
-    return res.status(401).json({
+    console.error("Auth middleware database error:", err);
+
+    return res.status(500).json({
       success: false,
-      message: "Invalid or expired token",
+      message: "Internal server error",
     });
   }
 };

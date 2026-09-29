@@ -24,6 +24,24 @@ const UserHighlight = () => {
     console.log(showHg);
   }, [showHg]);
 
+  const openHighlight = () => {
+  window.history.pushState({ highlight: true }, "");
+  setShowHg(true);
+};
+
+  useEffect(() => {
+  const handlePopState = () => {
+    if (showHg) {
+      setShowHg(false);
+    }
+  };
+
+  window.addEventListener("popstate", handlePopState);
+
+  return () => {
+    window.removeEventListener("popstate", handlePopState);
+  };
+}, [showHg]);
   return (
     <>
       {showHg && (
@@ -37,7 +55,7 @@ const UserHighlight = () => {
         className="flex justify-between items-center px-4 py-6 bg-white rounded-xl shadow-requestscard"
         onClick={() => {
           if (myHighlights.length >= 1) {
-            setShowHg(true);
+           openHighlight(); 
           }
         }}
       >

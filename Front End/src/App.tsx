@@ -24,28 +24,30 @@ import { useSocketListeners } from "./hooks/useSocketListners";
 import { useSocketEmitters } from "./services/useSocketEmitters";
 import type { RootState } from "./Store/store";
 import type { AuthMeResponse } from "./Types/User.type";
+import ErrorNotification from "./Components/ErrorNotification";
 
-const VITE_API_BASE_URL = import.meta.env.VITE_API_URL
+const VITE_API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const conversations = useSelector((state:RootState) => state.conversations.conversations);
+  const conversations = useSelector(
+    (state: RootState) => state.conversations.conversations,
+  );
   const socketEmitter = useSocketEmitters();
 
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
 
-
   const loginRoute = "/auth/login";
   const registerRoute = "/auth/register";
 
   useEffect(() => {
-    if(!socketEmitter) return console.log('cant emit socket');
-    const conversationIds = conversations.map(convo => convo.id);
-    socketEmitter.joinRooms(conversationIds)
-  },[conversations])
+    if (!socketEmitter) return console.log("cant emit socket");
+    const conversationIds = conversations.map((convo) => convo.id);
+    socketEmitter.joinRooms(conversationIds);
+  }, [conversations]);
   // Session restoration on mount
   useEffect(() => {
     const restoreSession = async () => {
@@ -57,7 +59,9 @@ const App = () => {
       }
 
       try {
-        const response = await apiFetch<AuthMeResponse>(`${VITE_API_BASE_URL}/auth/me`);
+        const response = await apiFetch<AuthMeResponse>(
+          `${VITE_API_BASE_URL}/auth/me`,
+        );
         const data = response.data;
         if (data.success) {
           dispatch(setUser(data.user));
@@ -112,9 +116,7 @@ const App = () => {
   }, []);
 
   // Socket listerners
-  useSocketListeners()
-  
-
+  useSocketListeners();
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -126,26 +128,29 @@ const App = () => {
   }
 
   return (
-    <Routes>
-      {/* Protected routes */}
-      <Route element={<Layout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/user/highlights" element={<Highlight />} />
-        <Route path="/user/requests" element={<RequestsPage />} />
-      </Route>
+    <>
+      <ErrorNotification />
+      <Routes>
+        {/* Protected routes */}
+        <Route element={<Layout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/user/highlights" element={<Highlight />} />
+          <Route path="/user/requests" element={<RequestsPage />} />
+        </Route>
 
-      {/* Nested protected layout */}
-      <Route element={<AddHighlightLayout />}>
-        <Route path="/user/addHighlights" element={<AddHighlightSection />} />
-      </Route>
+        {/* Nested protected layout */}
+        <Route element={<AddHighlightLayout />}>
+          <Route path="/user/addHighlights" element={<AddHighlightSection />} />
+        </Route>
 
-      {/* Chat */}
-      <Route path="/user/chat/:conversationId" element={<ChatLayout />} />
+        {/* Chat */}
+        <Route path="/user/chat/:conversationId" element={<ChatLayout />} />
 
-      {/* Auth routes */}
-      <Route path="/auth/register" element={<Register />} />
-      <Route path="/auth/login" element={<Login />} />
-    </Routes>
+        {/* Auth routes */}
+        <Route path="/auth/register" element={<Register />} />
+        <Route path="/auth/login" element={<Login />} />
+      </Routes>
+    </>
   );
 };
 

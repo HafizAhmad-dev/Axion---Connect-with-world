@@ -10,3 +10,4 @@ export interface Message extends BaseEntity {
   type: MessageType;
   status: MessageStatus;
 }
+

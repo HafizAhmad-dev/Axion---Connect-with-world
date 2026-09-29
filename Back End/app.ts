@@ -85,6 +85,15 @@ app.get('/health', async (req: Request, res: Response) => {
   }
 });
 
+app.get("/debug-sentry", function mainHandler(req, res,next) {
+ try{
+   throw new Error("My first Sentry error!");
+ }
+  catch(err){
+    next(err)
+  }
+});
+
 // Simple me endpoint
 app.get(`${baseURL}/me`, authMiddleware, (req: Request, res: Response) => {
   res.json({ msg: 'Hello', user: (req as any).user });

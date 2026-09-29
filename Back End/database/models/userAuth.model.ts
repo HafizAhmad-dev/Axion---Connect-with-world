@@ -26,29 +26,30 @@ export async function createUser(
   }
 }
 
-
 // =========================   SIGN MODULE =========================
-export async function SignModule(identifier:string):Promise<{id:string,username:string,displayname:string,email:string,password:string}>{
-  const query = `SELECT username, displayName, email, id, password FROM users WHERE email = $1 OR username = $1`
+export async function SignModule(
+  identifier: string,
+): Promise<{
+  id: string;
+  username: string;
+  displayname: string;
+  email: string;
+  password: string;
+}> {
+  const query = `SELECT username, displayName, email, id, password FROM users WHERE email = $1 OR username = $1`;
   const value = [identifier];
 
   try {
-    const result = await pool.query(query,value);
-    return result.rows[0]
+    const result = await pool.query(query, value);
+    return result.rows[0];
   } catch (error) {
     console.log(error);
-    throw error
+    throw error;
   }
 }
 
-
-
-
 // verify user module
-export async function verifyUserMODULE(
-  id: string,
-)
-: Promise<{
+export async function verifyUserMODULE(id: string): Promise<{
   id: string;
   username: string;
   displayName: string;
@@ -56,8 +57,17 @@ export async function verifyUserMODULE(
   createdAt: string;
   updatedAt: string;
 } | null> {
-  const query =
-    "SELECT id, username, displayName, email, createdAt, updatedAt FROM users WHERE id = $1 ";
+  const query = `
+  SELECT
+    id,
+    username,
+    displayname,
+    email,
+    createdat,
+    updatedat
+  FROM users
+  WHERE id = $1
+`;
   const value = [id];
 
   try {
