@@ -6,7 +6,7 @@
   "author": "",
   "main": "app.ts",
   "scripts": {
-    "start": "node --import ./dist/middlewares/instrument.js dist/app.js",
+    "start": "node --import ./dist/src/middlewares/instrument.js dist/app.js",
     "dev": "tsx watch --import ./src/middlewares/instrument.js  app.ts",
     "build": "tsc",
     "migrate": "tsx database/migrate.ts",
