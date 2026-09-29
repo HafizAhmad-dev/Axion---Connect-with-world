@@ -10,30 +10,62 @@ import { io } from "../socket/socket";
 
 export const sendNewMessage = async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { conversationId, content } = req.body;
+
+  const {
+    conversationId,
+    content,
+    clientMessageId,
+  } = req.body;
 
   if (!conversationId) {
-    return res.status(400).json({ error: "Conversation ID is required" });
+    return res.status(400).json({
+      error: "Conversation ID is required",
+    });
   }
 
   if (!content || content.trim() === "") {
-    return res.status(400).json({ error: "Message content is required" });
+    return res.status(400).json({
+      error: "Message content is required",
+    });
+  }
+
+  if (
+    typeof clientMessageId !== "string" ||
+    !clientMessageId.trim()
+  ) {
+    return res.status(400).json({
+      error: "Client message ID is required",
+    });
   }
 
   try {
     // Verify user is a participant in the conversation
-    const conversation = await getConversationById(conversationId, userId);
+    const conversation = await getConversationById(
+      conversationId,
+      userId
+    );
+
     if (!conversation) {
-      return res.status(403).json({ error: "Access denied" });
+      return res.status(403).json({
+        error: "Access denied",
+      });
     }
 
-    const message = await sendMessage(conversationId, userId, content.trim());
+    const message = await sendMessage(
+      conversationId,
+      userId,
+      content.trim(),
+      clientMessageId.trim()
+    );
 
     const roomName = `conversation:${conversationId}`;
 
-    console.log("Room members:", io.sockets.adapter.rooms.get(roomName));
-    const room = io.sockets.adapter.rooms.get(roomName);
+    console.log(
+      "Room members:",
+      io.sockets.adapter.rooms.get(roomName)
+    );
 
+    const room = io.sockets.adapter.rooms.get(roomName);
 
     // Check which sockets currently have this conversation open
     room?.forEach((socketId) => {
@@ -43,28 +75,34 @@ export const sendNewMessage = async (req: Request, res: Response) => {
 
       if (socket.data.activeConversation === conversationId) {
         console.log(
-          `User ${socket.data.userId} has conversation ${conversationId} open`,
+          `User ${socket.data.userId} has conversation ${conversationId} open`
         );
 
         // Mark/read handling will go here
       } else {
         console.log(
-          `User ${socket.data.userId} does NOT have conversation ${conversationId} open`,
+          `User ${socket.data.userId} does NOT have conversation ${conversationId} open`
         );
 
         // Increase unread count / send unread notification here
       }
     });
 
-    io.to(`conversation:${conversationId}`).emit("new_message", {
+    io.to(roomName).emit("new_message", {
       message,
       conversationId,
     });
 
-    res.status(201).json({ success: true, message });
+    return res.status(201).json({
+      success: true,
+      message,
+    });
   } catch (error) {
     console.error("Error sending message:", error);
-    res.status(500).json({ error: "Failed to send message" });
+
+    return res.status(500).json({
+      error: "Failed to send message",
+    });
   }
 };
 

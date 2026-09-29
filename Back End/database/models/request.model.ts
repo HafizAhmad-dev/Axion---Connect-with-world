@@ -44,7 +44,7 @@ WHERE r.from_user_id = $1 OR r.to_user_id = $1
   }
 };
 
-export async function deleteRequest(requestId: string, currentUserId: string) {
+export async function rejectRequest(requestId: string, currentUserId: string) {
   const result = await pool.query(
     `DELETE FROM friendRequests 
      WHERE id = $1 AND to_user_id = $2 
@@ -52,5 +52,21 @@ export async function deleteRequest(requestId: string, currentUserId: string) {
     [requestId, currentUserId]
   );
   
+  return result.rows.length > 0;
+}
+
+export async function cancelRequest(
+  requestId: string,
+  currentUserId: string
+) {
+  const result = await pool.query(
+    `DELETE FROM friendRequests
+     WHERE id = $1
+       AND from_user_id = $2
+       AND status = 'pending'
+     RETURNING id`,
+    [requestId, currentUserId]
+  );
+
   return result.rows.length > 0;
 }

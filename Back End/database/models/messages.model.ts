@@ -16,20 +16,30 @@ export interface Message {
 export async function sendMessage(
   conversationId: string,
   senderId: string,
-  content: string
+  content: string,
+  clientMessageId?: string
 ): Promise<Message> {
   const query = `
     INSERT INTO messages (
       conversation_id,
       sender_id,
-      content
+      content,
+      client_message_id
     )
-    VALUES ($1, $2, $3)
+
+    VALUES ($1, $2, $3, $4)
+
+    ON CONFLICT (sender_id, client_message_id)
+    WHERE client_message_id IS NOT NULL
+    DO UPDATE SET
+      client_message_id = EXCLUDED.client_message_id
+
     RETURNING
       id,
       conversation_id AS "conversationId",
       sender_id AS "senderId",
       content,
+      client_message_id AS "clientMessageId",
       created_at AS "createdAt",
       updated_at AS "updatedAt"
   `;
@@ -39,6 +49,7 @@ export async function sendMessage(
       conversationId,
       senderId,
       content.trim(),
+      clientMessageId ?? null,
     ]);
 
     return result.rows[0];

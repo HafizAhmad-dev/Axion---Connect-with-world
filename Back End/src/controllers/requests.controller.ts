@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { createRequest, fetchRequests, deleteRequest } from "../../database/models/request.model.js";
+import { createRequest, fetchRequests, rejectRequest, cancelRequest } from "../../database/models/request.model.js";
 import { acceptFriendRequest } from "../../database/models/friendship.model.js";
 
 // ================ SEND REQUEST =========================
@@ -153,7 +153,7 @@ export const acceptRequest = async (req: Request, res: Response) => {
 
 // ================ DECLINE REQUEST =========================
 export const declineRequest = async (req: Request, res: Response) => {
-  const { requestId } = req.body;
+  const { requestId } = req.body ?? {};
   const currentUserId = (req as any).user?.id;
   
   if (!requestId) {
@@ -162,7 +162,7 @@ export const declineRequest = async (req: Request, res: Response) => {
   
   try {
     // Make sure the request exists and belongs to current user
-    const deleted = await deleteRequest(requestId, currentUserId);
+    const deleted = await rejectRequest(requestId, currentUserId);
     
     if (!deleted) {
       return res.status(404).json({ error: 'Request not found or already processed' });
@@ -176,5 +176,45 @@ export const declineRequest = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Decline request error:', error);
     return res.status(500).json({ error: 'Failed to decline friend request' });
+  }
+};
+
+
+//  ================ cancel REQUEST =========================
+export const cancelReq = async (req: Request, res: Response) => {
+  const { requestId } = req.body ?? {};
+
+  if (typeof requestId !== "string" || !requestId.trim()) {
+    return res.status(400).json({
+      success: false,
+      text: "requestId is required",
+    });
+  }
+
+  try {
+    const deleted = await cancelRequest(
+      requestId.trim(),
+      req.user.id
+    );
+
+    if (!deleted) {
+      return res.status(404).json({
+        success: false,
+        text: "Pending friend request not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Friend request cancelled",
+    });
+
+  } catch (error) {
+    console.error("Error cancelling friend request:", error);
+
+    return res.status(500).json({
+      success: false,
+      text: "Failed to cancel friend request",
+    });
   }
 };
