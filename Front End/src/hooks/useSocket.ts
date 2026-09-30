@@ -1,20 +1,22 @@
 // hooks/useSocket.ts
 
 import { useEffect, useState } from "react";
-import { Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
+import { selectUser } from "../Store/Slices/UserSlice";
 import { getSocket } from "../socket/socket";
+import { useSelector } from "react-redux";
 
 export const useSocket = () => {
+  const user = useSelector(selectUser);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    let singletonSocket: Socket;
+    const singletonSocket = getSocket();
 
-    try {
-      singletonSocket = getSocket();
-    } catch (error) {
-      console.error(error);
+    if (!singletonSocket) {
+      setSocket(null);
+      setIsConnected(false);
       return;
     }
 
@@ -23,22 +25,27 @@ export const useSocket = () => {
 
     const handleConnect = () => {
       setIsConnected(true);
-      console.log("🔌 Socket connected");
     };
 
     const handleDisconnect = () => {
-      console.log("🔌 Socket disconnected");
+      setIsConnected(false);
+    };
+
+    const handleConnectError = (error: Error) => {
+      console.error("Socket connection error:", error.message);
       setIsConnected(false);
     };
 
     singletonSocket.on("connect", handleConnect);
     singletonSocket.on("disconnect", handleDisconnect);
+    singletonSocket.on("connect_error", handleConnectError);
 
     return () => {
       singletonSocket.off("connect", handleConnect);
       singletonSocket.off("disconnect", handleDisconnect);
+      singletonSocket.off("connect_error", handleConnectError);
     };
-  }, []);
+  }, [user]);
 
   return {
     socket,

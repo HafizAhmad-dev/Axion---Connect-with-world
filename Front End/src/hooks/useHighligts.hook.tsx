@@ -13,9 +13,7 @@ export const useHighlights = () => {
   );
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    console.log("Highlights",friendsHighlights);
-  }, [friendsHighlights]);
+
 
   useEffect(() => {
     async function fetchHighlights() {
@@ -24,7 +22,6 @@ export const useHighlights = () => {
           `${apiUrl}/highlights`,
         );
         dispatch(setFriendsHighlights(response.data.highlights))
-        console.log(response.data.highlights)
       } catch (error) {
         console.log(error);
       }

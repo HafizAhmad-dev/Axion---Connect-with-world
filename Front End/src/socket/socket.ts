@@ -7,28 +7,38 @@ const SOCKET_URL =
 
 let socket: Socket | null = null;
 
-export const getSocket = (): Socket => {
+export const getSocket = (): Socket | null => {
+  // Return existing singleton
   if (socket) {
     return socket;
   }
 
+  // Get authentication token
   const token = localStorage.getItem("token");
 
+  // User is not authenticated yet
   if (!token) {
-    throw new Error("No authentication token found.");
+    return null;
+
   }
 
+  // Create socket
   socket = io(SOCKET_URL, {
-    auth: { token },
+    auth: {
+      token,
+    },
     transports: ["websocket"],
   });
+
 
   return socket;
 };
 
-export const disconnectSocket = () => {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
+export const disconnectSocket = (): void => {
+  if (!socket) {
+    return;
   }
+
+  socket.disconnect();
+  socket = null;
 };

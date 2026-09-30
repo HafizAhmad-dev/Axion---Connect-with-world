@@ -41,17 +41,6 @@ interface LoginErrorResponse {
   errors?: BackendFieldError[];
 }
 
-const DEMO_ACCOUNTS = [
-  {
-    email: "test1@mail.com",
-    password: "123456",
-  },
-  {
-    email: "test2@mail.com",
-    password: "123456",
-  },
-];
-
 const Login = () => {
   const user = useSelector(selectUser);
   const navigate = useNavigate();
@@ -119,17 +108,6 @@ const Login = () => {
       password: "",
     });
 
-    setFieldErrors({});
-    setGeneralError(null);
-  }
-
-  function fillDemoAccount(email: string, password: string) {
-    setUseUsername(false);
-    setForm({
-      email,
-      username: "",
-      password,
-    });
     setFieldErrors({});
     setGeneralError(null);
   }
@@ -208,7 +186,7 @@ const Login = () => {
       });
 
       const data = response.data as LoginSuccessResponse;
-      console.log(data);
+      // console.log(data);
 
       if (data.success) {
         // ✅ Store token first
@@ -287,23 +265,6 @@ const Login = () => {
               <p className="text-xs text-gray-400 mt-1">
                 Sign in to your account
               </p>
-            </div>
-
-            {/* Demo Accounts - Modern chips */}
-            <div className="px-7 mb-2">
-              <div className="flex gap-2 justify-center">
-                {DEMO_ACCOUNTS.map((acc, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => fillDemoAccount(acc.email, acc.password)}
-                    className="px-3 py-1.5 text-xs font-medium bg-linear-to-r from-gray-100 to-gray-50 text-gray-600 rounded-full hover:from-gray-200 hover:to-gray-100 hover:text-[#2a51ff] transition-all duration-200 hover:scale-105"
-                    aria-label={`Use demo account ${i + 1}`}
-                  >
-                    Demo {i + 1}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Form */}

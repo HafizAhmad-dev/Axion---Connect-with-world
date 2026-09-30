@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../utils/api";
 
+const apiUrl = import.meta.env.VITE_BACKEND_URL;
+
 const useInternetConnection = () => {
   const [online, setOnline] = useState(navigator.onLine);
 
@@ -12,23 +14,23 @@ const useInternetConnection = () => {
       }
 
       try {
-        await apiFetch(`http://localhost:5000/health`, {
+        await apiFetch(`${apiUrl}/health`, {
           method: "GET",
           cache: "no-cache",
         });
 
         setOnline(true);
-        console.log("✅ Internet connection is active");
+        // console.log("✅ Backend connection is active");
       } catch {
         setOnline(false);
-        console.error("❌ Internet connection is inactive");
+        console.error("❌ Backend connection is inactive");
       }
     };
 
     window.addEventListener("online", verifyConnection);
     window.addEventListener("offline", verifyConnection);
 
-    verifyConnection(); // initial check
+    verifyConnection();
 
     return () => {
       window.removeEventListener("online", verifyConnection);
@@ -38,4 +40,5 @@ const useInternetConnection = () => {
 
   return { online };
 };
+
 export default useInternetConnection;

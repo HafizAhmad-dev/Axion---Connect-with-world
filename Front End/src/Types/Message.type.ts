@@ -9,6 +9,7 @@ export interface Message {
   updatedAt: string;
   isRead: boolean;
   status: MessageStatus;
+  clientMessageId: string;
 }
 
 

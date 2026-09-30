@@ -8,4 +8,5 @@ router.post('/send', auth_middleware_js_1.authMiddleware, requests_controller_js
 router.get('/getReqs/', requests_controller_js_1.getReqs);
 router.patch('/acceptRequest/', auth_middleware_js_1.authMiddleware, requests_controller_js_1.acceptRequest);
 router.patch('/declineRequest/', requests_controller_js_1.declineRequest);
+router.delete('/cancelRequest/', auth_middleware_js_1.authMiddleware, requests_controller_js_1.cancelReq);
 exports.default = router;

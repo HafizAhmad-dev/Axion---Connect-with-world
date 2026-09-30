@@ -21,7 +21,7 @@ import { loadInitialAppData } from "./services/localStorageService";
 import { setConversations } from "./Store/Slices/Conversations.slice";
 import { setMessages } from "./Store/Slices/Messages.slice";
 import { useSocketListeners } from "./hooks/useSocketListners";
-import { useSocketEmitters } from "./services/useSocketEmitters";
+import { useSocketEmitters } from "./hooks/useSocketEmitters";
 import type { RootState } from "./Store/store";
 import type { AuthMeResponse } from "./Types/User.type";
 import ErrorNotification from "./Components/ErrorNotification";
@@ -34,7 +34,7 @@ const App = () => {
   const conversations = useSelector(
     (state: RootState) => state.conversations.conversations,
   );
-  const socketEmitter = useSocketEmitters();
+  const { joinRooms, isConnected } = useSocketEmitters();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,10 +44,15 @@ const App = () => {
   const registerRoute = "/auth/register";
 
   useEffect(() => {
-    if (!socketEmitter) return console.log("cant emit socket");
+    if (!isConnected) {
+      return;
+    }
+
     const conversationIds = conversations.map((convo) => convo.id);
-    socketEmitter.joinRooms(conversationIds);
-  }, [conversations]);
+
+    joinRooms(conversationIds);
+  }, [conversations, isConnected, joinRooms]);
+
   // Session restoration on mount
   useEffect(() => {
     const restoreSession = async () => {
@@ -90,7 +95,7 @@ const App = () => {
       !isAuthenticated &&
       ![loginRoute, registerRoute].includes(location.pathname)
     ) {
-      console.log("User not authenticated, redirecting to login...");
+      // console.log("User not authenticated, redirecting to login...");
       navigate("/auth/login");
     }
   }, [isAuthenticated, location.pathname, navigate, isLoading]);

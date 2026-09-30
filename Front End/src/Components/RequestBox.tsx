@@ -5,6 +5,8 @@ import { apiFetch } from "../utils/api";
 import type { AcceptRequestResponse } from "../Types/Request.type";
 
 
+const apiUrl = import.meta.env.VITE_API_URL;
+
 interface RequestBoxProps {
   id: string;
   username: string;
@@ -33,9 +35,9 @@ const RequestBox = ({
 const handleAccept = async () => {
   try {
     const res = await apiFetch<AcceptRequestResponse>(
-      "/api/v1/requests/accept",
+      `${apiUrl}/requests/acceptRequest`,
       {
-        method: "POST",
+        method: "PATCH",
         body: JSON.stringify({
           requestId: id,
         }),
@@ -53,8 +55,8 @@ const handleAccept = async () => {
   const handleReject = async () => {
     setLoading(true);
     try {
-      await apiFetch(`/api/v1/requests/reject`, {
-        method: "POST",
+      await apiFetch(`${apiUrl}/requests/declineRequest`, {
+        method: "PATCH",
         body: JSON.stringify({ requestId: id }),
       });
       onAction?.();
@@ -68,8 +70,8 @@ const handleAccept = async () => {
   const handleCancel = async () => {
     setLoading(true);
     try {
-      await apiFetch(`/api/v1/requests/cancel`, {
-        method: "POST",
+      await apiFetch(`${apiUrl}/requests/cancelRequest/`, {
+        method: "DELETE",
         body: JSON.stringify({ requestId: id }),
       });
       onAction?.();

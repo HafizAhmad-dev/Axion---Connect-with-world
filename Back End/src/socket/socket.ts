@@ -24,7 +24,6 @@ export const initializeSocket = (server: HttpServer) => {
       const decoded = verifyToken(token) as { userId: string };
 
       socket.data.userId = decoded.userId;
-
       next();
     } catch (error) {
       next(new Error("Authentication error"));

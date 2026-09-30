@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router";
 import { useRegister } from "../hooks/useRegisterHook";
 import RegisterForm from "../Components/RegisterForm";
-import {HeaderIcon, SparkleIcon, ChevronIcon} from "../Components/RegisterIcons";
+import {HeaderIcon} from "../Components/RegisterIcons";
 const Register: React.FC = () => {
   const {
     form,
@@ -10,21 +10,14 @@ const Register: React.FC = () => {
     isLoading,
     focusedField,
     passwordValidation,
-    showDemoAccounts,
     fieldErrors,
     generalError,
     setShowPassword,
-    setShowDemoAccounts,
     setFocusedField,
     handleChange,
     handleSubmit,
-    fillDemoAccount,
   } = useRegister();
 
-  const demoAccounts = [
-    { username: "Demo1", displayName: "John Doe", email: "test1@mail.com", password: "Demo@123" },
-    { username: "Demo2", displayName: "Jane Smith", email: "test2@mail.com", password: "Demo@123" },
-  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-50 via-white to-indigo-50 p-4">
@@ -48,46 +41,10 @@ const Register: React.FC = () => {
                 <p className="text-xs text-gray-400 mt-1">Get started in seconds</p>
               </div>
 
-              {/* Demo Accounts Button */}
-              <div className="relative mt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-                  className="w-full py-2 px-3 bg-linear-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl text-sm text-purple-700 hover:from-purple-100 hover:to-pink-100 transition-all duration-200 flex items-center justify-center gap-2"
-                >
-                  <SparkleIcon />
-                  Quick Fill with Demo Account (Dev Only)
-                  <ChevronIcon rotated={showDemoAccounts} />
-                </button>
-
-                {showDemoAccounts && (
-                  <div className="absolute z-10 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
-                    <div className="p-2 bg-linear-to-r from-purple-50 to-pink-50 border-b border-purple-100">
-                      <p className="text-xs font-medium text-purple-700 text-center">Select a demo account</p>
-                    </div>
-                    {demoAccounts.map((account, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => fillDemoAccount(account)}
-                        className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0"
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-gray-800">{account.displayName}</p>
-                          <p className="text-xs text-gray-500">@{account.username}</p>
-                          <p className="text-xs text-gray-400 mt-0.5">{account.email}</p>
-                        </div>
-                      </button>
-                    ))}
-                    <div className="p-2 bg-gray-50 text-center">
-                      <p className="text-xs text-gray-400">⚠️ Demo accounts are for development only</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+            
 
               {/* Form */}
-              <form onSubmit={handleSubmit}>
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 <RegisterForm
                   form={form}
                   showPassword={showPassword}

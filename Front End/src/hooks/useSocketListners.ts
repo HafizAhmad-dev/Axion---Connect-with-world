@@ -12,11 +12,12 @@ export const useSocketListeners = () => {
 
   useEffect(() => {
     if (socket === null || !isConnected || user === null) {
-      return console.log("Cannot configure sockets");
+    
+      return;
     }
 
     const cleanup = setupSocketListners(dispatch, socket);
 
     return cleanup;
-  }, [[socket, isConnected, user, dispatch]]);
+  }, [socket, isConnected, user, dispatch]);
 };

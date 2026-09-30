@@ -6,20 +6,32 @@ const conversation_model_1 = require("../../database/models/conversation.model")
 const socket_1 = require("../socket/socket");
 const sendNewMessage = async (req, res) => {
     const userId = req.user.id;
-    const { conversationId, content } = req.body;
+    const { conversationId, content, clientMessageId, } = req.body;
     if (!conversationId) {
-        return res.status(400).json({ error: "Conversation ID is required" });
+        return res.status(400).json({
+            error: "Conversation ID is required",
+        });
     }
     if (!content || content.trim() === "") {
-        return res.status(400).json({ error: "Message content is required" });
+        return res.status(400).json({
+            error: "Message content is required",
+        });
+    }
+    if (typeof clientMessageId !== "string" ||
+        !clientMessageId.trim()) {
+        return res.status(400).json({
+            error: "Client message ID is required",
+        });
     }
     try {
         // Verify user is a participant in the conversation
         const conversation = await (0, conversation_model_1.getConversationById)(conversationId, userId);
         if (!conversation) {
-            return res.status(403).json({ error: "Access denied" });
+            return res.status(403).json({
+                error: "Access denied",
+            });
         }
-        const message = await (0, messages_model_1.sendMessage)(conversationId, userId, content.trim());
+        const message = await (0, messages_model_1.sendMessage)(conversationId, userId, content.trim(), clientMessageId.trim());
         const roomName = `conversation:${conversationId}`;
         console.log("Room members:", socket_1.io.sockets.adapter.rooms.get(roomName));
         const room = socket_1.io.sockets.adapter.rooms.get(roomName);
@@ -37,15 +49,20 @@ const sendNewMessage = async (req, res) => {
                 // Increase unread count / send unread notification here
             }
         });
-        socket_1.io.to(`conversation:${conversationId}`).emit("new_message", {
+        socket_1.io.to(roomName).emit("new_message", {
             message,
             conversationId,
         });
-        res.status(201).json({ success: true, message });
+        return res.status(201).json({
+            success: true,
+            message,
+        });
     }
     catch (error) {
         console.error("Error sending message:", error);
-        res.status(500).json({ error: "Failed to send message" });
+        return res.status(500).json({
+            error: "Failed to send message",
+        });
     }
 };
 exports.sendNewMessage = sendNewMessage;

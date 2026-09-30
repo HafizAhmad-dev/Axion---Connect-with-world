@@ -222,7 +222,7 @@ const UsersList = ({ query }: UsersListProps) => {
     try {
       // Get or create conversation with this user
       const response = await apiFetch<GetConversationResponse>(
-        `/${apiUrl}/conversations/with/${user.id}`,
+        `${apiUrl}/conversations/with/${user.id}`,
       );
       
       if(response.data.success && response.data.conversation){

@@ -20,9 +20,7 @@ const UserHighlight = () => {
   function addHighlight() {
     navigate("/user/addhighlights");
   }
-  useEffect(() => {
-    console.log(showHg);
-  }, [showHg]);
+
 
   const openHighlight = () => {
   window.history.pushState({ highlight: true }, "");

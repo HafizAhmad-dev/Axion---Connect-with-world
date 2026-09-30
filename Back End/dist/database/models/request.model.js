@@ -4,7 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.fetchRequests = exports.createRequest = void 0;
-exports.deleteRequest = deleteRequest;
+exports.rejectRequest = rejectRequest;
+exports.cancelRequest = cancelRequest;
 const db_conn_1 = __importDefault(require("../db.conn"));
 const createRequest = async (fromUserId, toUserId) => {
     const query = `
@@ -52,9 +53,17 @@ WHERE r.from_user_id = $1 OR r.to_user_id = $1
     }
 };
 exports.fetchRequests = fetchRequests;
-async function deleteRequest(requestId, currentUserId) {
+async function rejectRequest(requestId, currentUserId) {
     const result = await db_conn_1.default.query(`DELETE FROM friendRequests 
      WHERE id = $1 AND to_user_id = $2 
+     RETURNING id`, [requestId, currentUserId]);
+    return result.rows.length > 0;
+}
+async function cancelRequest(requestId, currentUserId) {
+    const result = await db_conn_1.default.query(`DELETE FROM friendRequests
+     WHERE id = $1
+       AND from_user_id = $2
+       AND status = 'pending'
      RETURNING id`, [requestId, currentUserId]);
     return result.rows.length > 0;
 }

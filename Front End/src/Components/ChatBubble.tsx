@@ -31,7 +31,7 @@ export default React.memo(function ChatBubble({
       >
         <p className="text-sm font-gfont">{text}</p>
         <div className="flex justify-between gap-3 items-end text-xs opacity-80 mt-1">
-          {!isOwnMsg && <span className="font-semibold">{username}</span>}
+          {!isOwnMsg && <span className="font-semibold opacity-60">@{username}</span>}
           {isOwnMsg && <span className="font-semibold">{status}</span>}
           <span>
             {new Date(time).toLocaleTimeString([], {
