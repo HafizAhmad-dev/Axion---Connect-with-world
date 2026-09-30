@@ -13,28 +13,58 @@ export async function searchUsersMODEL(
   userId: string,
 ): Promise<Users[]> {
   const dbquery = `
-    SELECT 
-      u.id, 
-      u.username, 
-      u.displayname, 
+    SELECT
+      u.id,
+      u.username,
+      u.displayname,
       u.createdAt,
+
       CASE
-  WHEN f.id IS NOT NULL THEN 'friend'
-  WHEN r.id IS NULL THEN 'none'
-  WHEN r.from_user_id = $2 THEN 'pending_sent'
-  WHEN r.to_user_id = $2 THEN 'pending_received'
-  ELSE 'none'
-END AS status
-    FROM users u 
-    LEFT JOIN friendships f ON 
-      (f.user_id = $2 AND f.friend_id = u.id) OR 
-      (f.user_id = u.id AND f.friend_id = $2)
-    LEFT JOIN friendRequests r ON 
-      (r.from_user_id = $2 AND r.to_user_id = u.id) OR 
-      (r.from_user_id = u.id AND r.to_user_id = $2)
-    WHERE u.username ILIKE $1 AND u.id != $2
+        WHEN EXISTS (
+          SELECT 1
+          FROM friendships f
+          WHERE
+            (f.user_id = $2 AND f.friend_id = u.id)
+            OR
+            (f.user_id = u.id AND f.friend_id = $2)
+        ) THEN 'friend'
+
+        WHEN NOT EXISTS (
+          SELECT 1
+          FROM friendRequests r
+          WHERE
+            (r.from_user_id = $2 AND r.to_user_id = u.id)
+            OR
+            (r.from_user_id = u.id AND r.to_user_id = $2)
+        ) THEN 'none'
+
+        WHEN EXISTS (
+          SELECT 1
+          FROM friendRequests r
+          WHERE
+            r.from_user_id = $2
+            AND r.to_user_id = u.id
+        ) THEN 'pending_sent'
+
+        WHEN EXISTS (
+          SELECT 1
+          FROM friendRequests r
+          WHERE
+            r.from_user_id = u.id
+            AND r.to_user_id = $2
+        ) THEN 'pending_received'
+
+        ELSE 'none'
+      END AS status
+
+    FROM users u
+
+    WHERE u.username ILIKE $1
+      AND u.id != $2
+
     LIMIT 5
   `;
+
   const values = [`%${query}%`, userId];
 
   try {

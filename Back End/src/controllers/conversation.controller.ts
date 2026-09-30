@@ -7,6 +7,7 @@ import {
   markConversationAsRead,
   updateConversationSettings,
   updateConversationNickname,
+  getConversationById,
 } from "../../database/models/conversation.model";
 
 // ============ Get or create conversation with a friend ============
@@ -30,9 +31,11 @@ export const getConversationWithFriend = async (
       .status(400)
       .json({ error: "Cannot start conversation with yourself" });
   }
-
+  
   try {
-    const conversation = await getOrCreateConversation(currentUserId, friendId);
+    const result = await getOrCreateConversation(currentUserId, friendId);
+    const conversation = await getConversationById(result.id,req.user.id);
+
     res.json({ success: true, conversation });
   } catch (error) {
     console.error("Error getting conversation:", error);

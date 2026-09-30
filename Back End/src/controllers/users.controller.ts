@@ -4,7 +4,7 @@ import {getUserByIdModel, searchUsersMODEL} from "../../database/models/users.mo
 
 export const searchUsers = async (req: Request, res: Response) => {
   const q = ((req.query.q as string) || "").trim().toLowerCase();
-  console.log('usres from req',req.user)
+
   const userId = req.user.id;
 
   if (!q) {

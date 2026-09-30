@@ -92,7 +92,6 @@ const UsersList = ({ query }: UsersListProps) => {
       );
 
       if (res.data.success) {
-        console.log(res.data.data)
         setUsers(res.data.data);
       } else {
         setUsers([]);
@@ -228,8 +227,6 @@ const UsersList = ({ query }: UsersListProps) => {
       if(response.data.success && response.data.conversation){
         dispatch(setCurrentConversation(response.data.conversation));
       };
-
-      // Store in Redux
 
       // Navigate to chat page
       navigate(`/user/chat/${response.data.conversation.id}`);

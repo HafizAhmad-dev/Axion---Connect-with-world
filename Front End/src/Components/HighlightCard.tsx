@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import PhotoHolder from "./PhotoHolder";
 import HighLightView from "./HighLightView";
@@ -6,93 +6,192 @@ import HighLightView from "./HighLightView";
 import type { Highlight } from "../Types/Highlights.types";
 
 type Props = {
-  id: string; //it is the friendId
+  id: string; // friendId
   name: string;
   highlights: Highlight[];
-
 };
 
-const HighlightCard = React.memo(({ id, name, highlights }: Props) => {
-  const [showHighlight, setShowHighlight] = useState(false);
+const HighlightCard = React.memo(
+  ({ id, name, highlights }: Props) => {
+    const [showHighlight, setShowHighlight] =
+      useState(false);
 
-  const latestHighlight = highlights[0];
+    const [selectedHighlightId, setSelectedHighlightId] =
+      useState<string | null>(null);
 
-  function changeHighlight() {
-    setShowHighlight(true);
-  }
+    const latestHighlight = highlights[0];
 
-  function formatTime(time: string): string {
-    const date = new Date(time);
-    const now = new Date();
+    /*
+     * Open highlight viewer.
+     */
+    const openHighlight = () => {
+      if (!latestHighlight) {
+        return;
+      }
 
-    const timeString = date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+      setSelectedHighlightId(latestHighlight.id);
+      setShowHighlight(true);
 
-    const isToday: boolean =
-      date.getFullYear() === now.getFullYear() &&
-      date.getMonth() === now.getMonth() &&
-      date.getDate() === now.getDate();
+      /*
+       * Create a browser history entry for the
+       * highlight overlay.
+       *
+       * This is not a page navigation.
+       */
+      window.history.pushState(
+        { highlightViewer: true },
+        "",
+      );
+    };
 
-    if (isToday) {
-      return `Today, ${timeString}`;
+    /*
+     * Close highlight viewer.
+     */
+    const closeHighlight = () => {
+      /*
+       * If this viewer created the current history
+       * entry, go back to remove that entry.
+       */
+      if (
+        window.history.state?.highlightViewer
+      ) {
+        window.history.back();
+        return;
+      }
+
+      setShowHighlight(false);
+      setSelectedHighlightId(null);
+    };
+
+    /*
+     * Handle browser Back button.
+     *
+     * Example:
+     *
+     * Home
+     *   ↓
+     * Highlight opened
+     *   ↓
+     * Back button
+     *   ↓
+     * Highlight closes
+     *   ↓
+     * Still on Home
+     */
+    useEffect(() => {
+      const handlePopState = () => {
+        setShowHighlight(false);
+        setSelectedHighlightId(null);
+      };
+
+      window.addEventListener(
+        "popstate",
+        handlePopState,
+      );
+
+      return () => {
+        window.removeEventListener(
+          "popstate",
+          handlePopState,
+        );
+      };
+    }, []);
+
+    function formatTime(time: string): string {
+      const date = new Date(time);
+      const now = new Date();
+
+      const timeString =
+        date.toLocaleTimeString("en-US", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+      const isToday =
+        date.getFullYear() ===
+          now.getFullYear() &&
+        date.getMonth() === now.getMonth() &&
+        date.getDate() === now.getDate();
+
+      if (isToday) {
+        return `Today, ${timeString}`;
+      }
+
+      const yesterday = new Date(now);
+
+      yesterday.setDate(
+        yesterday.getDate() - 1,
+      );
+
+      const isYesterday =
+        date.getFullYear() ===
+          yesterday.getFullYear() &&
+        date.getMonth() ===
+          yesterday.getMonth() &&
+        date.getDate() ===
+          yesterday.getDate();
+
+      if (isYesterday) {
+        return `Yesterday, ${timeString}`;
+      }
+
+      const dateString =
+        date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        });
+
+      return `${dateString}, ${timeString}`;
     }
 
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
+    return (
+      <>
+        {showHighlight && selectedHighlightId && (
+          <HighLightView
+            ownerId={id}
+            owner="other"
+            initialHighlightId={
+              selectedHighlightId
+            }
+            onComplete={closeHighlight}
+          />
+        )}
 
-    const isYesterday: boolean =
-      date.getFullYear() === yesterday.getFullYear() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getDate() === yesterday.getDate();
+        <div
+          className="highlightCard flex gap-5 px-1 py-1 mt-4 hover:bg-white"
+          onClick={openHighlight}
+        >
+          <div className="avatar relative">
+            <PhotoHolder
+              css="h-12 w-12"
+              username={name}
+            />
 
-    if (isYesterday) {
-      return `Yesterday, ${timeString}`;
-    }
+            {highlights.length > 0 && (
+              <div className="highlightCount absolute h-5 w-5 right-0 bottom-0 rounded-full bg-[#9810FA] border border-gray-300 flex justify-center items-center text-[12px] text-white">
+                {highlights.length}
+              </div>
+            )}
+          </div>
 
-    const dateString = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-    return `${dateString}, ${timeString}`;
-  }
+          <div className="flex flex-col">
+            <h2 className="font-semibold">
+              {name}
+            </h2>
 
-  return (
-    <>
-      {showHighlight && (
-        <HighLightView
-          ownerId={id}
-          owner="other"
-          onComplete={() => setShowHighlight(false)}
-        />
-      )}
-
-      <div
-        className="highlightCard flex gap-5 px-1 py-1 mt-4 hover:bg-white"
-        onClick={changeHighlight}
-      >
-        <div className="avatar relative">
-          <PhotoHolder css="h-12 w-12" username={name} />
-
-          {highlights.length > 0 && (
-            <div className="highlightCount absolute h-5 w-5 right-0 bottom-0 rounded-full bg-[#9810FA] border border-gray-300 flex justify-center items-center text-[12px] text-white">
-              {highlights.length}
-            </div>
-          )}
+            {latestHighlight && (
+              <p className="text-gray-500 text-[13px] font-semibold">
+                {formatTime(
+                  latestHighlight.createdAt,
+                )}
+              </p>
+            )}
+          </div>
         </div>
-
-        <div className="flex flex-col">
-          <h2 className="font-semibold">{name}</h2>
-
-          <p className="text-gray-500 text-[13px] font-semibold">
-            {formatTime(latestHighlight?.createdAt)}
-          </p>
-        </div>
-      </div>
-    </>
-  );
-});
+      </>
+    );
+  },
+);
 
 export default HighlightCard;

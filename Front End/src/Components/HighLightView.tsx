@@ -1,8 +1,20 @@
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux";
 
 import type { RootState } from "../Store/store";
-import { markAsSeen } from "../Store/Slices/HighlightsSlice";
+
+import {
+  markAsSeen,
+} from "../Store/Slices/HighlightsSlice";
+
 import { apiFetch } from "../utils/api";
 
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -10,6 +22,7 @@ const apiUrl = import.meta.env.VITE_API_URL;
 interface HighLightViewProps {
   ownerId: string;
   owner: "self" | "other";
+  initialHighlightId?: string | null;
   onComplete: () => void;
 }
 
@@ -19,59 +32,228 @@ interface HighlightDetails {
   time: string;
 }
 
-const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
+const HighLightView = ({
+  ownerId,
+  owner,
+  initialHighlightId,
+  onComplete,
+}: HighLightViewProps) => {
   const dispatch = useDispatch();
 
-  const user = useSelector((state: RootState) => state.user.user);
-  // Friend data — only needed when viewing someone else's highlights
-  const friend = useSelector((state: RootState) =>
-    state.highlights.friendsHighlights.find((fh) => fh.userId === ownerId),
+  const user = useSelector(
+    (state: RootState) =>
+      state.user.user,
   );
 
-  // My highlights — only needed when owner === "self"
+  /*
+   * Friend data.
+   */
+  const friend = useSelector(
+    (state: RootState) =>
+      state.highlights.friendsHighlights.find(
+        (fh) =>
+          fh.userId === ownerId,
+      ),
+  );
+
+  /*
+   * My highlights.
+   */
   const myHighlights = useSelector(
-    (state: RootState) => state.highlights.myHighlights,
+    (state: RootState) =>
+      state.highlights.myHighlights,
   );
 
-  // Decide which highlights this viewer should display
+  /*
+   * Decide which highlights to display.
+   */
   const highlights =
-    owner === "self" ? myHighlights : (friend?.highlights ?? []);
+    owner === "self"
+      ? myHighlights
+      : (friend?.highlights ?? []);
 
-  const [index, setIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [index, setIndex] =
+    useState(0);
+
+  const [progress, setProgress] =
+    useState(0);
+
+  const [paused, setPaused] =
+    useState(false);
 
   const totalTime = 5000;
 
-  const frameRef = useRef<number>(0);
-  const startTimeRef = useRef<number>(0);
-  const pauseTimeRef = useRef<number>(0);
+  const frameRef =
+    useRef<number>(0);
 
-  async function markAsView(highlightId: string) {
+  const startTimeRef =
+    useRef<number>(0);
+
+  const pauseTimeRef =
+    useRef<number>(0);
+
+  /*
+   * Mark a highlight as viewed on the server.
+   */
+  async function markAsView(
+    highlightId: string,
+  ) {
     try {
       const response = await apiFetch(
         `${apiUrl}/highlights/${highlightId}/view`,
-        { method: "POST" },
+        {
+          method: "POST",
+        },
       );
-      console.log("view response", response);
+
+      console.log(
+        "view response",
+        response,
+      );
     } catch (error) {
-      console.log(error);
+      console.log(
+        "Failed to mark highlight as viewed:",
+        error,
+      );
     }
   }
 
   /*
-
-
-   * Reset viewer when a different owner is opened.
+   * Set the starting highlight.
+   *
+   * If a specific highlight was clicked,
+   * find its position in the complete list.
+   *
+   * Otherwise start from index 0.
    */
   useEffect(() => {
-    setIndex(0);
+    if (highlights.length === 0) {
+      return;
+    }
+
+    const startIndex =
+      initialHighlightId
+        ? highlights.findIndex(
+            (highlight) =>
+              highlight.id ===
+              initialHighlightId,
+          )
+        : 0;
+
+    setIndex(
+      startIndex >= 0
+        ? startIndex
+        : 0,
+    );
+
     setProgress(0);
     setPaused(false);
 
     startTimeRef.current = 0;
     pauseTimeRef.current = 0;
-  }, [ownerId]);
+  }, [
+    ownerId,
+    initialHighlightId,
+    highlights,
+  ]);
+
+  /*
+   * Mark the currently displayed highlight
+   * as viewed.
+   *
+   * IMPORTANT:
+   * This hook stays above the conditional
+   * return so React's hook order is stable.
+   */
+  const currentHighlight =
+    highlights[index];
+
+  useEffect(() => {
+    if (
+      owner === "other" &&
+      currentHighlight
+    ) {
+      markAsView(
+        currentHighlight.id,
+      );
+    }
+  }, [
+    currentHighlight,
+    owner,
+  ]);
+
+  /*
+   * Move to next highlight.
+   */
+  const nextHighlight = () => {
+    if (
+      index >=
+      highlights.length - 1
+    ) {
+      setProgress(100);
+
+      /*
+       * Only mark another user's
+       * highlights as seen.
+       */
+      if (owner === "other") {
+        dispatch(
+          markAsSeen(ownerId),
+        );
+      }
+
+      /*
+       * Close viewer.
+       */
+      onComplete();
+
+      return;
+    }
+
+    setIndex(
+      (prev) => prev + 1,
+    );
+
+    setProgress(0);
+  };
+
+  /*
+   * Move to previous highlight.
+   */
+  const prevHighlight = () => {
+    setIndex((prev) =>
+      prev === 0
+        ? highlights.length - 1
+        : prev - 1,
+    );
+
+    setProgress(0);
+  };
+
+  /*
+   * Left third = previous.
+   * Right third = next.
+   */
+  const handleClick = (
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => {
+    const rect =
+      e.currentTarget.getBoundingClientRect();
+
+    const x =
+      e.clientX - rect.left;
+
+    if (
+      x < rect.width / 3
+    ) {
+      prevHighlight();
+    } else if (
+      x >
+      (2 * rect.width) / 3
+    ) {
+      nextHighlight();
+    }
+  };
 
   /*
    * Animate current highlight.
@@ -81,88 +263,72 @@ const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
       return;
     }
 
-    const animate = (time: number) => {
+    const animate = (
+      time: number,
+    ) => {
       if (!paused) {
-        if (pauseTimeRef.current) {
-          startTimeRef.current += time - pauseTimeRef.current;
+        if (
+          pauseTimeRef.current
+        ) {
+          startTimeRef.current +=
+            time -
+            pauseTimeRef.current;
 
           pauseTimeRef.current = 0;
         }
 
-        const elapsed = time - startTimeRef.current;
+        const elapsed =
+          time -
+          startTimeRef.current;
 
-        const currentProgress = Math.min((elapsed / totalTime) * 100, 100);
+        const currentProgress =
+          Math.min(
+            (elapsed /
+              totalTime) *
+              100,
+            100,
+          );
 
-        setProgress(currentProgress);
+        setProgress(
+          currentProgress,
+        );
 
-        if (currentProgress >= 100) {
+        if (
+          currentProgress >=
+          100
+        ) {
           nextHighlight();
           return;
         }
       } else {
-        pauseTimeRef.current = time;
+        pauseTimeRef.current =
+          time;
       }
 
-      frameRef.current = requestAnimationFrame(animate);
+      frameRef.current =
+        requestAnimationFrame(
+          animate,
+        );
     };
 
-    startTimeRef.current = performance.now();
+    startTimeRef.current =
+      performance.now();
 
-    frameRef.current = requestAnimationFrame(animate);
+    frameRef.current =
+      requestAnimationFrame(
+        animate,
+      );
 
     return () => {
-      cancelAnimationFrame(frameRef.current);
+      cancelAnimationFrame(
+        frameRef.current,
+      );
     };
-  }, [paused, index, highlights.length]);
-
-  /*
-   * Move to next highlight.
-   */
-  const nextHighlight = () => {
-    if (index >= highlights.length - 1) {
-      setProgress(100);
-
-      /*
-       * Only mark someone else's highlight as viewed.
-       * Your own highlight cannot be "viewed by yourself".
-       */
-      if (owner === "other") {
-        dispatch(markAsSeen(ownerId));
-      }
-
-      onComplete();
-
-      return;
-    }
-
-    setIndex((prev) => prev + 1);
-    setProgress(0);
-  };
-
-  /*
-   * Move to previous highlight.
-   */
-  const prevHighlight = () => {
-    setIndex((prev) => (prev === 0 ? highlights.length - 1 : prev - 1));
-
-    setProgress(0);
-  };
-
-  /*
-   * Left side = previous
-   * Right side = next
-   */
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-
-    const x = e.clientX - rect.left;
-
-    if (x < rect.width / 3) {
-      prevHighlight();
-    } else if (x > (2 * rect.width) / 3) {
-      nextHighlight();
-    }
-  };
+  }, [
+    paused,
+    index,
+    highlights.length,
+  ]);
 
   /*
    * Nothing to display.
@@ -171,139 +337,197 @@ const HighLightView = ({ ownerId, owner, onComplete }: HighLightViewProps) => {
     return null;
   }
 
-  const currentHighlight = highlights[index];
-  console.log("currentHighlight", currentHighlight);
+  /*
+   * Format highlight timestamp.
+   */
+  function formatTime(
+    time: string,
+  ): string {
+    const date =
+      new Date(time);
 
-  useEffect(() => {
-    if (owner === "other" && currentHighlight) {
-      markAsView(currentHighlight.id);
-    }
-  }, [currentHighlight, owner]);
+    const now =
+      new Date();
 
-  function formatTime(time: string): string {
-    const date = new Date(time);
-    const now = new Date();
+    const timeString =
+      date.toLocaleTimeString(
+        "en-US",
+        {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        },
+      );
 
-    const timeString = date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    const isToday: boolean =
-      date.getFullYear() === now.getFullYear() &&
-      date.getMonth() === now.getMonth() &&
-      date.getDate() === now.getDate();
+    const isToday =
+      date.getFullYear() ===
+        now.getFullYear() &&
+      date.getMonth() ===
+        now.getMonth() &&
+      date.getDate() ===
+        now.getDate();
 
     if (isToday) {
       return `Today, ${timeString}`;
     }
 
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterday =
+      new Date(now);
 
-    const isYesterday: boolean =
-      date.getFullYear() === yesterday.getFullYear() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getDate() === yesterday.getDate();
+    yesterday.setDate(
+      yesterday.getDate() - 1,
+    );
+
+    const isYesterday =
+      date.getFullYear() ===
+        yesterday.getFullYear() &&
+      date.getMonth() ===
+        yesterday.getMonth() &&
+      date.getDate() ===
+        yesterday.getDate();
 
     if (isYesterday) {
       return `Yesterday, ${timeString}`;
     }
 
-    const dateString = date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
+    const dateString =
+      date.toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+        },
+      );
+
     return `${dateString}, ${timeString}`;
   }
 
-  const highlightDetails: HighlightDetails = {
-    displayName:
-      owner === "self"
-        ? //  ? user?.displayName ??
-          "You"
-        : (friend?.displayName ?? ""),
+  const highlightDetails: HighlightDetails =
+    {
+      displayName:
+        owner === "self"
+          ? "You"
+          : (friend?.displayName ??
+            ""),
 
-    username:
-      owner === "self" ? (user?.username ?? "") : (friend?.username ?? ""),
+      username:
+        owner === "self"
+          ? (user?.username ??
+            "")
+          : (friend?.username ??
+            ""),
 
-    time: formatTime(currentHighlight.createdAt),
-  };
+      time:
+        formatTime(
+          currentHighlight.createdAt,
+        ),
+    };
+
   return (
     <div
-      className={`fixed inset-0 z-99 flex flex-col justify-center items-center bg-[${currentHighlight.background ?? "black"}] bg-cover bg-center`}
+      className="fixed inset-0 z-99 flex flex-col justify-center items-center bg-cover bg-center"
       style={{
-        background  : currentHighlight.background ?? "black",
+        background:
+          currentHighlight.background ??
+          "black",
       }}
       onClick={handleClick}
-      onPointerDown={() => setPaused(true)}
-      onPointerUp={() => setPaused(false)}
-      onPointerLeave={() => setPaused(false)}
+      onPointerDown={() =>
+        setPaused(true)
+      }
+      onPointerUp={() =>
+        setPaused(false)
+      }
+      onPointerLeave={() =>
+        setPaused(false)
+      }
     >
       {/* Progress bars */}
       <div className="absolute top-4 left-0 right-0 flex gap-1 px-4">
-        {highlights.map((_, i) => {
-          const width = i < index ? 100 : i === index ? progress : 0;
+        {highlights.map(
+          (highlight, i) => {
+            const width =
+              i < index
+                ? 100
+                : i === index
+                  ? progress
+                  : 0;
 
-          return (
-            <div
-              key={i}
-              className="flex-1 h-2 bg-white/30 rounded overflow-hidden"
-            >
+            return (
               <div
-                className="h-full bg-white rounded"
-                style={{
-                  width: `${width}%`,
-                }}
-              />
-            </div>
-          );
-        })}
+                key={highlight.id}
+                className="flex-1 h-2 bg-white/30 rounded overflow-hidden"
+              >
+                <div
+                  className="h-full bg-white rounded"
+                  style={{
+                    width: `${width}%`,
+                  }}
+                />
+              </div>
+            );
+          },
+        )}
       </div>
+
+      {/* Highlight details */}
       <div className="details absolute top-9 left-10 text-white">
         <div className="flex items-center gap-2">
           <h3 className="text-2xl mb-0 leading-none font-bold pb-0">
-            {highlightDetails.displayName}
+            {
+              highlightDetails.displayName
+            }
           </h3>
 
-          <p className="time">{highlightDetails.time}</p>
+          <p className="time">
+            {highlightDetails.time}
+          </p>
         </div>
 
         <h4 className="pb-0 mb-0 leading-none text-sm">
           @{highlightDetails.username}
         </h4>
       </div>
+
       {/* Text highlight */}
-      {currentHighlight.type === "text" && (
+      {currentHighlight.type ===
+        "text" && (
         <p className="text-white text-center text-3xl font-semibold drop-shadow-lg px-4 max-w-[90%] wrap-break-word">
-          {currentHighlight.caption}
+          {
+            currentHighlight.caption
+          }
         </p>
       )}
 
       {/* Image highlight */}
-      {currentHighlight.type === "image" && (
+      {currentHighlight.type ===
+        "image" && (
         <img
-          src={currentHighlight.mediaUrl ?? ""}
-          alt={currentHighlight.caption ?? "Highlight"}
+          src={
+            currentHighlight.mediaUrl ??
+            ""
+          }
+          alt={
+            currentHighlight.caption ??
+            "Highlight"
+          }
           className="max-h-[80vh] max-w-[90vw] object-contain"
         />
       )}
 
       {/* Video highlight */}
-      {currentHighlight.type === "video" && (
+      {currentHighlight.type ===
+        "video" && (
         <video
-          src={currentHighlight.mediaUrl ?? ""}
+          src={
+            currentHighlight.mediaUrl ??
+            ""
+          }
           className="max-h-[80vh] max-w-[90vw] object-contain"
           autoPlay
           playsInline
         />
       )}
-
-      {/* Owner name */}
-      {/* <p className="absolute bottom-8 text-white text-lg font-medium drop-shadow-md">
-        {owner === "self" ? "You" : friend?.displayName}
-      </p> */}
     </div>
   );
 };
