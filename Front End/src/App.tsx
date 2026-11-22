@@ -1,3 +1,5 @@
+import "./config/sentry.config.ts";
+
 import { Routes, Route, useNavigate, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";

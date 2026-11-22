@@ -16,6 +16,7 @@
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@imagekit/react": "^5.0.3",
     "@reduxjs/toolkit": "^2.11.2",
+    "@sentry/react": "^11.16.0",
     "@tailwindcss/vite": "^4.1.18",
     "axios": "^1.16.1",
     "flowbite-react": "^0.12.17",
