@@ -423,7 +423,7 @@ const ChatLayout = () => {
           </h2>
         </div>
 
-        <button
+        {/* <button
           onClick={recover}
           className={`p-2 rounded-full transition ${
             recovered
@@ -433,7 +433,7 @@ const ChatLayout = () => {
           title="Recover data from cache"
         >
           <Database size={18} />
-        </button>
+        </button> */}
       </header>
 
       <main

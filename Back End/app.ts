@@ -29,6 +29,7 @@ const baseURL = "/api/v1";
 // CORS configuration
 const allowedOrigins = [
   "https://axion-live.netlify.app",
+    "http://localhost:5173",
   process.env.CLIENT_URL,
   process.env.FRONTEND_URL,
 ].filter((origin): origin is string => Boolean(origin));
