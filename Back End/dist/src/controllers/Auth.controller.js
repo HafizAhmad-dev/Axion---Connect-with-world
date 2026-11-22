@@ -10,7 +10,7 @@ const jwtToken_hook_js_1 = require("../utils/jwtToken.hook.js");
 const userAuth_model_js_1 = require("../../database/models/userAuth.model.js");
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
 const JWT_SECRET = process.env.JWT_SECRET;
-//for registering the user
+// -------------------------------- REGISTER USER Controller --------------------------------
 const registerUser = async (req, res) => {
     if ((0, handleValidatin_js_1.handleValidation)(req, res))
         return;
@@ -18,7 +18,7 @@ const registerUser = async (req, res) => {
     const hash = await bcrypt_1.default.hash(password, saltRounds);
     try {
         const newUser = await (0, userAuth_model_js_1.createUser)(username, email, hash);
-        const token = (0, jwtToken_hook_js_1.signToken)({ userId: newUser.id });
+        const token = (0, jwtToken_hook_js_1.signToken)({ userId: newUser.id, sessionVersion: 1 });
         return res.status(201).json({
             message: "User registered successfully",
             User: newUser,
@@ -53,7 +53,7 @@ const registerUser = async (req, res) => {
     }
 };
 exports.registerUser = registerUser;
-//for llogin the user
+// -------------------------------- LOGIN USER Controller --------------------------------
 const loginUser = async (req, res) => {
     // Validate request
     if ((0, handleValidatin_js_1.handleValidation)(req, res))
@@ -68,7 +68,8 @@ const loginUser = async (req, res) => {
         });
     }
     // Find user by username or email
-    const user = await (0, userAuth_model_js_1.SignModule)(identifier);
+    const user = await (0, userAuth_model_js_1.SigninModule)(identifier);
+    // Debugging line to check the user object
     if (!user) {
         return res.status(401).json({
             success: false,
@@ -83,7 +84,7 @@ const loginUser = async (req, res) => {
             message: "Invalid credentials",
         });
     }
-    const token = (0, jwtToken_hook_js_1.signToken)({ userId: user.id });
+    const token = (0, jwtToken_hook_js_1.signToken)({ userId: user.id, sessionVersion: user.session_version });
     // Success
     return res.status(200).json({
         success: true,
@@ -91,6 +92,7 @@ const loginUser = async (req, res) => {
         user: {
             id: user.id,
             username: user.username,
+            displayName: user.displayname,
             email: user.email,
         },
         token,

@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createUser = createUser;
-exports.SignModule = SignModule;
+exports.SigninModule = SigninModule;
 exports.verifyUserMODULE = verifyUserMODULE;
 const db_conn_1 = __importDefault(require("../db.conn"));
 //registration module
@@ -21,8 +21,8 @@ async function createUser(username, email, password, displayName = username) {
     }
 }
 // =========================   SIGN MODULE =========================
-async function SignModule(identifier) {
-    const query = `SELECT username, displayName, email, id, password FROM users WHERE email = $1 OR username = $1`;
+async function SigninModule(identifier) {
+    const query = `SELECT username, displayName, email, id, password, session_version FROM users WHERE email = $1 OR username = $1 `;
     const value = [identifier];
     try {
         const result = await db_conn_1.default.query(query, value);
@@ -36,15 +36,16 @@ async function SignModule(identifier) {
 // verify user module
 async function verifyUserMODULE(id) {
     const query = `
-  SELECT
+SELECT
     id,
     username,
     displayname,
     email,
-    createdat,
-    updatedat
-  FROM users
-  WHERE id = $1
+    "createdat" AS "createdAt",
+    "updatedat" AS "updatedAt",
+    session_version AS "sessionVersion"
+FROM users
+WHERE id = $1;
 `;
     const value = [id];
     try {

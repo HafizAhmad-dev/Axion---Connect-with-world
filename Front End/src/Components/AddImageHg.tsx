@@ -1,13 +1,9 @@
-import { useRef, useState, type ChangeEvent, useEffect } from "react";
-import { useOutletContext } from "react-router";
-import { Camera } from "lucide-react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Keyboard, Thumbs } from "swiper/modules";
-import 'swiper/css';
 
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { useOutletContext } from "react-router";
+import { Camera, X } from "lucide-react";
 
 import CustomInput from "./CustomTextInputBox";
-import DevBlock from "./UnderDev";
 
 interface AddImageHgContext {
   text: string;
@@ -16,106 +12,129 @@ interface AddImageHgContext {
   setImageFile: (file: File | null) => void;
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
 const AddImageHg = () => {
-  const { text, setText, setImageFile } =
+  const { text, setText, imageFile, setImageFile } =
     useOutletContext<AddImageHgContext>();
 
   const inputRef = useRef<HTMLInputElement>(null);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [thumbsSwiper, setThumbsSwiper] = useState<any>(null);
 
-  const handleClick = () => inputRef.current?.click();
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = e.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
+  // Create and clean up the local image preview URL.
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl(null);
+      return;
+    }
 
-    // Pick the first file for now
-    setImageFile(selectedFiles[0]);
+    const url = URL.createObjectURL(imageFile);
+    setPreviewUrl(url);
 
-    // Generate preview
-    const previews = Array.from(selectedFiles).map((file) =>
-      URL.createObjectURL(file)
-    );
-    setImagePreviews(previews);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [imageFile]);
 
-    setTimeout(() => {
-      e.target.value = "";
-    }, 0);
+  // Open the file picker.
+  const handleClick = () => {
+    inputRef.current?.click();
   };
 
-  // Clean up object URLs
-  useEffect(() => {
-    return () => {
-      imagePreviews.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [imagePreviews]);
+  // Validate and select the image.
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    // Allow selecting the same file again.
+    e.target.value = "";
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image.");
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError("Image must be 5 MB or smaller.");
+      return;
+    }
+
+    setImageFile(file);
+    setError(null);
+  };
+
+  // Remove the selected image.
+  const handleRemove = () => {
+    setImageFile(null);
+    setError(null);
+  };
 
   return (
-    <div className="px-5 py-5 flex flex-col items-center text-center w-full">
-      <DevBlock />
+    <div className="flex w-full flex-col items-center px-5 py-5 text-center">
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
         className="hidden"
         onChange={handleChange}
-        multiple
       />
 
-      {imagePreviews.length > 0 ? (
-        <>
-          {/* Main Slider */}
-          <Swiper
-            modules={[Keyboard, Thumbs]}
-            spaceBetween={10}
-            slidesPerView={1}
-            thumbs={{ swiper: thumbsSwiper }}
-            keyboard={{ enabled: true }}
-            className="w-full h-64 rounded-xl overflow-hidden border border-gray-300"
-          >
-            {imagePreviews.map((src, index) => (
-              <SwiperSlide key={index}>
-                <img
-                  src={src}
-                  alt={`Preview ${index + 1}`}
-                  className="w-full h-64 object-cover rounded-xl"
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
+      {previewUrl ? (
+        <div className="relative h-64 w-full overflow-hidden rounded-xl border border-gray-300">
+          <img
+            src={previewUrl}
+            alt="Selected Highlight preview"
+            className="h-full w-full object-contain"
+          />
 
-          {/* Thumbnail Slider */}
-          <Swiper
-            onSwiper={setThumbsSwiper}
-            modules={[Keyboard, Thumbs]}
-            spaceBetween={5}
-            slidesPerView={Math.min(imagePreviews.length, 5)}
-            watchSlidesProgress
-            className="w-full h-16 mt-2"
+          <button
+            type="button"
+            onClick={handleRemove}
+            aria-label="Remove selected image"
+            className="absolute right-2 top-2 rounded-full bg-black/60 p-2 text-white transition-colors hover:bg-red-600"
           >
-            {imagePreviews.map((src, index) => (
-              <SwiperSlide key={index} className="cursor-pointer flex justify-center">
-                <img
-                  src={src}
-                  alt={`Thumb ${index + 1}`}
-                  className="w-full  h-16 object-cover rounded-lg border border-gray-300"
-                />
-              </SwiperSlide>
-            ))}
-          </Swiper>
-        </>
+            <X size={18} />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleClick}
+            className="absolute bottom-2 right-2 rounded-lg bg-black/60 px-3 py-2 text-sm text-white transition-colors hover:bg-black/80"
+          >
+            Change image
+          </button>
+        </div>
       ) : (
-        <div
-          className="w-full border border-dashed border-gray-400 rounded-xl h-64 flex flex-col items-center justify-center cursor-pointer hover:border-purple-500 transition-colors"
+        <button
+          type="button"
           onClick={handleClick}
+          className="flex h-64 w-full cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-gray-400 transition-colors hover:border-purple-500"
         >
-          <span className="px-4 py-4 rounded-full bg-[#F3E8FF]">
+          <span className="rounded-full bg-[#F3E8FF] px-4 py-4">
             <Camera stroke="#9810FA" size={30} />
           </span>
-          <h3 className="pt-1 font-semibold text-gray-600">Upload Image</h3>
-          <p className="text-gray-400">Click to Choose Image</p>
-        </div>
+
+          <h3 className="pt-1 font-semibold text-gray-600">
+            Upload Image
+          </h3>
+
+          <p className="text-gray-400">
+            Click to choose an image
+          </p>
+
+          <p className="mt-1 text-xs text-gray-400">
+            Maximum file size: 5 MB
+          </p>
+        </button>
+      )}
+
+      {error && (
+        <p role="alert" className="mt-2 text-sm text-red-500">
+          {error}
+        </p>
       )}
 
       <CustomInput
@@ -123,9 +142,7 @@ const AddImageHg = () => {
         onChange={setText}
         placeholder="Add a caption (optional)"
         maxLength={220}
-        className="relative text-left px-3 py-2 outline-none wrap-break-words whitespace-pre-wrap min-h-16 text-sm w-full
-        empty:before:content-[attr(data-placeholder)] empty:before:absolute empty:before:left-2 empty:before:top-2
-        empty:before:text-gray-500 empty:before:pointer-events-none border border-gray-400 rounded-xl text-black"
+        className="relative mt-4 min-h-16 w-full whitespace-pre-wrap wrap-break-words rounded-xl border border-gray-400 px-3 py-2 text-left text-sm text-black outline-none"
       />
     </div>
   );

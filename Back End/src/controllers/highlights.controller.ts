@@ -5,50 +5,70 @@ import type { HighlightRow } from "../types/Highlights.type";
 
 // Controller function to create a highlight
 export const createHighlight = async (req: Request, res: Response) => {
-  //controller inputs
+  // Controller inputs
   const userId = req.user?.id;
   const highlightData: HighlightInput = req.body;
 
-  //check the inputs
+  // Check authentication
   if (!userId) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  if (!highlightData) {
+  // Check request body
+  if (!highlightData || typeof highlightData !== "object" || Array.isArray(highlightData)) {
     return res.status(400).json({
       error: "Request body is required",
     });
   }
 
-  if (!highlightData.type) {
-    return res.status(400).json({ error: "Error: Highlight type is required" });
-  }
-
+  // Validate highlight type
   if (
     highlightData.type !== "text" &&
     highlightData.type !== "image" &&
     highlightData.type !== "video"
   ) {
-    return res.status(400).json({ error: "Error: Invalid highlight type" });
+    return res.status(400).json({
+      error: "Invalid highlight type",
+    });
   }
 
-  // validate caption for text highlights
-  if (
-    highlightData.type === "text" &&
-    (!highlightData.caption || highlightData.caption.trim() === "")
-  ) {
-    return res
-      .status(400)
-      .json({ error: "Error: Caption is required for text highlights" });
+  // Validate text highlights
+  if (highlightData.type === "text") {
+    if (
+      typeof highlightData.caption !== "string" ||
+      highlightData.caption.trim() === ""
+    ) {
+      return res.status(400).json({
+        error: "Caption is required for text highlights",
+      });
+    }
+  }
+
+  // Validate image highlights
+  if (highlightData.type === "image") {
+    if (
+      typeof highlightData.mediaUrl !== "string" ||
+      highlightData.mediaUrl.trim() === ""
+    ) {
+      return res.status(400).json({
+        error: "Image URL is required",
+      });
+    }
   }
 
   try {
     const newHighlight = await createHighlightModel(userId, highlightData);
-    res.status(201).json(newHighlight);
+
+    return res.status(201).json(newHighlight);
   } catch (error) {
-    res.status(500).json({ error: error });
+    console.error("Create Highlight Error:", error);
+
+    return res.status(500).json({
+      error: "Failed to create Highlight",
+    });
   }
 };
+
 
 // Function for handling the views;
 export const viewHighlight = async (

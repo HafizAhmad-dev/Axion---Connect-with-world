@@ -1,12 +1,14 @@
+import { useState } from "react";
 import { X } from "lucide-react";
 import { Outlet, useNavigate } from "react-router";
-import { useState } from "react";
 
 import type {
   HighlightTextPostData,
   HighlightType,
 } from "../Types/Highlights.types";
+
 import { apiFetch } from "../utils/api";
+import { uploadImage } from "../services/imagekit.service"; // Adjust to your actual service path.
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -45,54 +47,97 @@ const AddHighlightLayout = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [bgColor, setBgColor] = useState(backgroundPresets[0]);
 
-  // Selected highlight type
-  const [highlightType, setHighlightType] = useState<HighlightType>("text");
+  const [highlightType, setHighlightType] =
+    useState<HighlightType>("text");
+
+  const [isSharing, setIsSharing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleClose = () => {
     navigate(-1);
   };
 
   const canShare =
-    highlightType === "text" ? text.trim().length > 0 : imageFile !== null;
+    highlightType === "text"
+      ? text.trim().length > 0
+      : imageFile !== null;
 
   const handleShare = async () => {
-    if (!canShare) return;
+    if (!canShare || isSharing) return;
 
-    if (highlightType === "text") {
-      const reqData: HighlightTextPostData = {
-        caption: text,
-        background: bgColor,
-        type: highlightType,
-      };
+    setIsSharing(true);
+    setError(null);
 
-      try {
-        const response = await apiFetch(`${apiUrl}/highlights/create`, {
+    try {
+      if (highlightType === "text") {
+        const reqData: HighlightTextPostData = {
+          type: "text",
+          caption: text.trim(),
+          background: bgColor,
+        };
+
+        await apiFetch(`${apiUrl}/highlights/create`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(reqData),
         });
+      } else if (highlightType === "image" && imageFile) {
+        
+        // Upload the image directly to ImageKit.
+        const uploadedImage = await uploadImage(imageFile,'highlights');
+        
+        console.log("Uploaded image:", uploadedImage);
+        if (!uploadedImage.url) {
+          throw new Error("Image upload did not return a URL.");
+        }
 
-        console.log(response);
-        navigate("/user/highlights");
-      } catch (e) {
-        console.error(e);
+        // Save the returned URL in your backend.
+        const reqData = {
+          type: "image" as const,
+          mediaUrl: uploadedImage.url,
+          caption: text.trim() || null,
+        };
+
+        await apiFetch(`${apiUrl}/highlights/create`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(reqData),
+        });
+      } else {
+        return;
       }
+    
+      navigate("/user/highlights");
+    } catch (error) {
+      console.error("Failed to create Highlight:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to create Highlight. Please try again."
+      );
+    } finally {
+      setIsSharing(false);
     }
   };
 
   return (
     <div className="flex h-screen w-screen flex-col">
       {/* Header */}
-      <header className="flex justify-between px-5 py-5 bg-linear-to-r from-purple-500 to-pink-600">
-        <h2 className="text-lg font-bold text-white font-hfont">
+      <header className="flex justify-between bg-linear-to-r from-purple-500 to-pink-600 px-5 py-5">
+        <h2 className="font-hfont text-lg font-bold text-white">
           Add Highlight
         </h2>
 
         <button
-          className="hover:bg-white/20 rounded-full w-7 h-7 flex justify-center items-center"
+          type="button"
           onClick={handleClose}
+          disabled={isSharing}
+          aria-label="Close"
+          className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/20 disabled:opacity-50"
         >
           <X size={15} stroke="white" />
         </button>
@@ -120,24 +165,35 @@ const AddHighlightLayout = () => {
       </main>
 
       {/* Footer */}
-      <div className="font-hfont tracking-wider flex justify-around items-center px-4 py-4 bg-[#F8FAFC] border-t border-gray-300">
+      <footer className="flex items-center justify-around border-t border-gray-300 bg-[#F8FAFC] px-4 py-4 font-hfont tracking-wider">
         <button
+          type="button"
           onClick={handleClose}
-          className="px-10 py-2 border border-gray-400 rounded-xl font-semibold text-gray-600 hover:bg-black/5"
+          disabled={isSharing}
+          className="rounded-xl border border-gray-400 px-10 py-2 font-semibold text-gray-600 hover:bg-black/5 disabled:opacity-50"
         >
           Cancel
         </button>
 
         <button
+          type="button"
           onClick={handleShare}
-          disabled={!canShare}
-          className={`px-10 py-2 rounded-xl font-semibold text-white bg-linear-to-r from-purple-500 to-pink-600 ${
-            !canShare ? "opacity-50 cursor-not-allowed" : ""
+          disabled={!canShare || isSharing}
+          className={`rounded-xl bg-linear-to-r from-purple-500 to-pink-600 px-10 py-2 font-semibold text-white ${
+            !canShare || isSharing
+              ? "cursor-not-allowed opacity-50"
+              : ""
           }`}
         >
-          Share
+          {isSharing ? "Sharing..." : "Share"}
         </button>
-      </div>
+      </footer>
+
+      {error && (
+        <p role="alert" className="px-4 py-2 text-center text-sm text-red-500">
+          {error}
+        </p>
+      )}
     </div>
   );
 };

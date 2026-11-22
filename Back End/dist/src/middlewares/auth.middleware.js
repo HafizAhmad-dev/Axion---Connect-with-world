@@ -30,9 +30,14 @@ const authMiddleware = async (req, res, next) => {
                 message: "User not found",
             });
         }
+        if (user.sessionVersion !== decoded.sessionVersion) {
+            return res.status(401).json({
+                message: "Session expired. Please log in again.",
+            });
+        }
         req.user = {
             id: user.id,
-            displayName: user.displayName,
+            displayName: user.displayname,
             username: user.username,
             email: user.email,
             createdAt: user.createdAt,

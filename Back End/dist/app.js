@@ -15,6 +15,8 @@ const requests_route_js_1 = __importDefault(require("./src/routes/requests.route
 const highlights_routes_js_1 = __importDefault(require("./src/routes/highlights.routes.js"));
 const auth_middleware_js_1 = require("./src/middlewares/auth.middleware.js");
 const friends_routes_js_1 = __importDefault(require("./src/routes/friends.routes.js"));
+const profileUpdate_routes_js_1 = __importDefault(require("./src/routes/profileUpdate.routes.js"));
+const imagekitauth_route_js_1 = __importDefault(require("./src/routes/imagekitauth.route.js"));
 const db_conn_js_1 = __importDefault(require("./database/db.conn.js"));
 const http_1 = __importDefault(require("http"));
 const socket_js_1 = require("./src/socket/socket.js");
@@ -57,6 +59,8 @@ app.use(`${baseURL}/auth`, auth_routes_js_1.default);
 app.use(`${baseURL}/requests`, auth_middleware_js_1.authMiddleware, requests_route_js_1.default);
 app.use(`${baseURL}/friends`, auth_middleware_js_1.authMiddleware, friends_routes_js_1.default);
 app.use(`${baseURL}/highlights`, auth_middleware_js_1.authMiddleware, highlights_routes_js_1.default);
+app.use(`${baseURL}/profile`, auth_middleware_js_1.authMiddleware, profileUpdate_routes_js_1.default);
+app.use(`${baseURL}/imagekit`, imagekitauth_route_js_1.default);
 // Health check endpoint
 app.get('/health', async (req, res) => {
     const health = {

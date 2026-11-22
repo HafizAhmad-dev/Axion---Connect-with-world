@@ -6,5 +6,6 @@ const router = Router();
 router.post('/create',createHighlight);
 router.post('/:highlightId/view', viewHighlight);
 router.get('/',retrieveHighlights);
-router.get('/me',retrieveUserHighlights)
+router.get('/me',retrieveUserHighlights);
+
 export default router;

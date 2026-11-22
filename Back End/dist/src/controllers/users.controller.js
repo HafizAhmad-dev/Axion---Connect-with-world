@@ -4,7 +4,6 @@ exports.getUserById = exports.searchUsers = void 0;
 const users_model_js_1 = require("../../database/models/users.model.js");
 const searchUsers = async (req, res) => {
     const q = (req.query.q || "").trim().toLowerCase();
-    console.log('usres from req', req.user);
     const userId = req.user.id;
     if (!q) {
         return res.status(400).json({

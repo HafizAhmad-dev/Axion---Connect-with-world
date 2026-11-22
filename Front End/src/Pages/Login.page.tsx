@@ -24,6 +24,7 @@ interface LoginSuccessResponse {
   user: {
     id: string;
     username: string;
+    displayName:string;
     email: string;
     createdAt: string;
     updatedAt: string;
@@ -184,7 +185,7 @@ const Login = () => {
         },
         body: JSON.stringify(payload),
       });
-
+    
       const data = response.data as LoginSuccessResponse;
       // console.log(data);
 
@@ -192,6 +193,7 @@ const Login = () => {
         // ✅ Store token first
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        console.log('Login user api return',data.user);
 
         // ✅ Dispatch user to Redux
         dispatch(setUser(data.user));

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = exports.signToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const signToken = (payload) => {
-    return jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, { expiresIn: '2d' });
+    return jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 exports.signToken = signToken;
 const verifyToken = (token) => {

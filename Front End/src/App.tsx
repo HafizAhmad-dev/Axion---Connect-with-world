@@ -25,6 +25,7 @@ import { useSocketEmitters } from "./hooks/useSocketEmitters";
 import type { RootState } from "./Store/store";
 import type { AuthMeResponse } from "./Types/User.type";
 import ErrorNotification from "./Components/ErrorNotification";
+import ProfilePage from "./Pages/ProfilePage";
 
 const VITE_API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -141,6 +142,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/user/highlights" element={<Highlight />} />
           <Route path="/user/requests" element={<RequestsPage />} />
+          <Route path="/user/profile" element={<ProfilePage />} />
         </Route>
 
         {/* Nested protected layout */}

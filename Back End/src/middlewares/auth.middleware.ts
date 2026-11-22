@@ -18,10 +18,10 @@ export const authMiddleware = async (
 
   const token = authHeader.split(" ")[1];
 
-  let decoded: { userId: string };
+  let decoded: { userId: string, sessionVersion: number };
 
   try {
-    decoded = verifyToken(token) as { userId: string };
+    decoded = verifyToken(token) as { userId: string, sessionVersion: number };
   } catch {
     return res.status(401).json({
       success: false,
@@ -31,7 +31,7 @@ export const authMiddleware = async (
 
   try {
     const user = await verifyUserMODULE(decoded.userId);
-
+   
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -39,9 +39,14 @@ export const authMiddleware = async (
       });
     }
 
+    if (user.sessionVersion !== decoded.sessionVersion) {
+      return res.status(401).json({
+        message: "Session expired. Please log in again.",
+      });
+    }
     req.user = {
       id: user.id,
-      displayName: user.displayName,
+      displayName: user.displayname,
       username: user.username,
       email: user.email,
       createdAt: user.createdAt,

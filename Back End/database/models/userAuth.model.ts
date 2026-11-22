@@ -27,16 +27,15 @@ export async function createUser(
 }
 
 // =========================   SIGN MODULE =========================
-export async function SignModule(
-  identifier: string,
-): Promise<{
+export async function SigninModule(identifier: string): Promise<{
   id: string;
   username: string;
   displayname: string;
   email: string;
   password: string;
+  session_version: number;
 }> {
-  const query = `SELECT username, displayName, email, id, password FROM users WHERE email = $1 OR username = $1`;
+  const query = `SELECT username, displayName, email, id, password, session_version FROM users WHERE email = $1 OR username = $1 `;
   const value = [identifier];
 
   try {
@@ -52,26 +51,29 @@ export async function SignModule(
 export async function verifyUserMODULE(id: string): Promise<{
   id: string;
   username: string;
-  displayName: string;
+  displayname: string;
   email: string;
   createdAt: string;
   updatedAt: string;
+  sessionVersion: number;
 } | null> {
   const query = `
-  SELECT
+SELECT
     id,
     username,
     displayname,
     email,
-    createdat,
-    updatedat
-  FROM users
-  WHERE id = $1
+    "createdat" AS "createdAt",
+    "updatedat" AS "updatedAt",
+    session_version AS "sessionVersion"
+FROM users
+WHERE id = $1;
 `;
   const value = [id];
 
   try {
     const result = await pool.query(query, value);
+  
     if (result.rows.length === 0) {
       return null; // ← Add this! User not found in database
     }

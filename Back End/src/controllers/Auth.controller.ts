@@ -4,13 +4,15 @@ import bcrypt from "bcrypt";
 import { signToken } from "../utils/jwtToken.hook.js";
 import {
   createUser,
-  SignModule,
+  SigninModule,
   verifyUserMODULE,
 } from "../../database/models/userAuth.model.js";
 const saltRounds = Number(process.env.SALT_ROUNDS) || 10;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-//for registering the user
+
+
+// -------------------------------- REGISTER USER Controller --------------------------------
 export const registerUser = async (req: Request, res: Response) => {
   if (handleValidation(req, res)) return;
 
@@ -21,7 +23,7 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const newUser = await createUser(username, email, hash);
 
-    const token = signToken({ userId: newUser.id });
+    const token = signToken({ userId: newUser.id, sessionVersion: 1 });
 
     return res.status(201).json({
       message: "User registered successfully",
@@ -58,13 +60,16 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
-//for llogin the user
+
+// -------------------------------- LOGIN USER Controller --------------------------------
 export const loginUser = async (req: Request, res: Response) => {
   // Validate request
   if (handleValidation(req, res)) return;
 
   const { username, email, password } = req.body;
   const identifier = username || email;
+
+
   // Missing credentials
   if (!identifier || !password) {
     return res.status(400).json({
@@ -74,7 +79,9 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 
   // Find user by username or email
-  const user = await SignModule(identifier);
+  const user = await SigninModule(identifier);
+
+ // Debugging line to check the user object
 
   if (!user) {
     return res.status(401).json({
@@ -85,6 +92,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
   // Check password
   const isCorrectPass = await bcrypt.compare(password, user.password);
+
   if (!isCorrectPass) {
     return res.status(401).json({
       success: false,
@@ -92,7 +100,7 @@ export const loginUser = async (req: Request, res: Response) => {
     });
   }
 
-  const token = signToken({ userId: user.id });
+  const token = signToken({ userId: user.id, sessionVersion: user.session_version });
 
   // Success
   return res.status(200).json({
@@ -101,8 +109,10 @@ export const loginUser = async (req: Request, res: Response) => {
     user: {
       id: user.id,
       username: user.username,
+      displayName: user.displayname,
       email: user.email,
     },
+
     token,
   });
 };
@@ -110,6 +120,7 @@ export const loginUser = async (req: Request, res: Response) => {
 //for verifying the token and returning text(on order)
 export const verifyUser = async (req: Request, res: Response) => {
   const userFromToken = (req as any).user;
+
   if (!userFromToken) {
     return res.status(401).json({
       success: false,

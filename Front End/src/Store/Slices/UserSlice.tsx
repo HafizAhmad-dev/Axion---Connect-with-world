@@ -6,6 +6,7 @@ import { saveUser } from "../../services/localStorageService";
 interface UserType {
   id: string;
   username: string;
+  displayName: string;
   email: string;
   createdAt: string;
   updatedAt: string;
@@ -46,6 +47,8 @@ export const userSlice = createSlice({
     },
   },
 });
+
+
 export const { setUser, logoutUser, setAuth } = userSlice.actions;
 
 // selectors

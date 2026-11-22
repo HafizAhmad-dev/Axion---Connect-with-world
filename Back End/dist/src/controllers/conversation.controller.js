@@ -18,7 +18,8 @@ const getConversationWithFriend = async (req, res) => {
             .json({ error: "Cannot start conversation with yourself" });
     }
     try {
-        const conversation = await (0, conversation_model_1.getOrCreateConversation)(currentUserId, friendId);
+        const result = await (0, conversation_model_1.getOrCreateConversation)(currentUserId, friendId);
+        const conversation = await (0, conversation_model_1.getConversationById)(result.id, req.user.id);
         res.json({ success: true, conversation });
     }
     catch (error) {

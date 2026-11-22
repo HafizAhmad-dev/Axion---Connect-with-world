@@ -4,9 +4,10 @@ import { MessageCircle } from 'lucide-react';
 import { Clock4 } from 'lucide-react';
 import { useNavigate } from "react-router";
 import { useLocation } from 'react-router';
+import { CgProfile } from "react-icons/cg";
 
 
-type tabs = 'chats' | 'highlights' | 'requests';
+type tabs = 'chats' | 'highlights' | 'requests' | 'profile';
 
 const Navbar = () => {
     const [activeTab, setActiveTab] = useState<tabs>('chats');
@@ -71,6 +72,19 @@ const Navbar = () => {
                     </span>
                     <span className={`font-hfont font-semibold ${activeTab === 'requests' ? 'text-[#4D72FF]' : 'text-gray-500'}`}>Requests</span>
                 </li>
+
+                {/* //profile tab */}
+                <li
+                    className={`flex justify-center items-center flex-col  px-4 py-2  rounded-xl ${activeTab === 'profile' ? 'bg-[#F1F6FF]' : ''}`}     
+                onClick={() => {
+                    setActiveTab('profile');
+                    navigate('/user/profile');
+                }}>
+                    <span className="icon">
+                        <CgProfile size={23} strokeWidth={0} color={activeTab === 'profile' ? '#4D72FF' : '#6B7280'} fill={activeTab === 'profile' ? '#4D72FF' : 'transparent'} />
+                    </span>
+                    <span className={`font-hfont font-semibold ${activeTab === 'profile' ? 'text-[#4D72FF]' : 'text-gray-500'}`}>Profile</span>
+                </li>   
             </ul>
         </nav>
     )

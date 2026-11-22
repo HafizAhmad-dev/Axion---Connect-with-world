@@ -11,6 +11,8 @@ import requestsRouter from './src/routes/requests.route.js'
 import highlightsRouter from './src/routes/highlights.routes.js'
 import { authMiddleware } from "./src/middlewares/auth.middleware.js";
 import friendsRouter from "./src/routes/friends.routes.js";
+import profileRouter from "./src/routes/profileUpdate.routes.js";
+import imageKitRouter from "./src/routes/imagekitauth.route.js"
 import pool from "./database/db.conn.js";  
 import http from 'http';
 import { initializeSocket } from "./src/socket/socket.js";
@@ -18,6 +20,7 @@ import { initializeSocket } from "./src/socket/socket.js";
 const app: Application = express();
 const server = http.createServer(app);
 initializeSocket(server);
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -58,6 +61,8 @@ app.use(`${baseURL}/auth`, authRouter);
 app.use(`${baseURL}/requests`, authMiddleware, requestsRouter);
 app.use(`${baseURL}/friends`, authMiddleware, friendsRouter);
 app.use(`${baseURL}/highlights`, authMiddleware, highlightsRouter);
+app.use(`${baseURL}/profile`, authMiddleware, profileRouter);
+app.use(`${baseURL}/imagekit`, imageKitRouter);
 
 // Health check endpoint
 app.get('/health', async (req: Request, res: Response) => {

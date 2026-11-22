@@ -96,3 +96,18 @@ export async function getUserByIdModel(id: string) {
     throw new Error("Failed to fetch user");
   }
 }
+
+
+export async function getUserPasswordModel(
+  id: string
+): Promise<{ password: string } | null> {
+  const query = `
+    SELECT password
+    FROM users
+    WHERE id = $1
+  `;
+
+  const result = await pool.query(query, [id]);
+
+  return result.rows[0] ?? null;
+}
