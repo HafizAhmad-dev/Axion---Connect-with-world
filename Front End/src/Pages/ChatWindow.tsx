@@ -1,10 +1,13 @@
+
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { v4 as uuid } from "uuid";
+import { ArrowDown, Send } from "lucide-react";
 
 import PhotoHolder from "../Components/PhotoHolder";
 import ChatMessage from "../Components/ChatBubble";
+
 import useInternetConnection from "../hooks/InternetStatus.hook";
 import { useSocket } from "../hooks/useSocket";
 
@@ -14,7 +17,6 @@ import type {
   SendMessageApiResponse,
   ApiMessagesResponse,
 } from "../Types/Message.type";
-import type { Participant } from "../Types/Conversation.type";
 
 import { apiFetch } from "../utils/api";
 
@@ -25,8 +27,6 @@ import {
 } from "../Store/Slices/Messages.slice";
 
 import {
-  setCurrentConversation,
-  setConversations,
   clearCurrentConversation,
   resetUnreadCount,
 } from "../Store/Slices/Conversations.slice";
@@ -34,22 +34,16 @@ import {
 import {
   loadMessagesForConversation,
   saveMessagesForConversation,
-  loadCurrentConversation,
-  loadConversations,
   saveCurrentConversation,
 } from "../services/localStorageService";
 
-import { Send, Database, ArrowDown } from "lucide-react";
 import { setActiveConversation } from "../services/socketEmittersService";
 
-const EMPTY: Message[] = [];
-const INVALID = "noConversation";
+const INVALID_CONVERSATION = "noConversation";
 
 const ChatLayout = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
-  const [otherUser, setOtherUser] = useState<Participant | null>(null);
-  const [recovered, setRecovered] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const dispatch = useDispatch();
@@ -57,345 +51,331 @@ const ChatLayout = () => {
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
-  const joinedRoomRef = useRef(false);
   const isUserScrollingRef = useRef(false);
 
   const { socket, isConnected } = useSocket();
   const { online } = useInternetConnection();
 
   const currentConversation = useSelector(
-    (s: RootState) => s.conversations.currentConversation,
+    (state: RootState) => state.conversations.currentConversation,
   );
 
-  const messages = useSelector((state: RootState) =>
-    currentConversation?.id && currentConversation.id !== INVALID
-      ? state.messages[currentConversation.id] || EMPTY
-      : EMPTY,
+  const appUserId = useSelector(
+    (state: RootState) => state.user.user?.id,
   );
-
-  const appUserId = useSelector((s: RootState) => s.user.user?.id);
 
   const conversationId = currentConversation?.id;
 
-  // RESET NEW MESSAGES COUNT
+  const messages = useSelector((state: RootState) =>
+    conversationId && conversationId !== INVALID_CONVERSATION
+      ? state.messages[conversationId] || []
+      : [],
+  );
+
+  // Find the other participant.
+  const otherUser = currentConversation?.participants?.find(
+    (participant) => participant.id !== appUserId,
+  );
+
+  // Reset unread messages.
   useEffect(() => {
-    if (!conversationId || conversationId === INVALID) return;
+    if (!conversationId || conversationId === INVALID_CONVERSATION) {
+      return;
+    }
 
     dispatch(resetUnreadCount(conversationId));
   }, [conversationId, dispatch]);
 
-  // ========== Local Storage Helpers ==========
-  const cacheMessages = (id: string, msgs: Message[]) =>
-    saveMessagesForConversation(id, msgs);
-
-  const loadCachedMessages = (id: string) =>
-    loadMessagesForConversation(id) || [];
-
-  // ========== Recovery ==========
-  const recover = useCallback(() => {
-    let found = false;
-
-    const savedConv = loadCurrentConversation();
-
-    if (savedConv && savedConv.id !== INVALID) {
-      dispatch(setCurrentConversation(savedConv));
-      found = true;
-    }
-
-    const savedList = loadConversations();
-
-    if (savedList?.length) {
-      dispatch(setConversations(savedList));
-      found = true;
-    }
-
-    if (conversationId) {
-      const cached = loadCachedMessages(conversationId);
-
-      if (cached.length) {
-        dispatch(
-          setMessages({
-            conversationId,
-            messages: cached,
-          }),
-        );
-
-        found = true;
-      }
-    }
-
-    setRecovered(found);
-    setTimeout(() => setRecovered(false), 2000);
-  }, [dispatch, conversationId]);
-
-  // ========== Active conversation ==========
+  // Save the selected conversation.
   useEffect(() => {
-    if (socket && conversationId && conversationId !== INVALID) {
-      setActiveConversation(socket, conversationId);
-
-      return () => {
-        setActiveConversation(socket, null);
-      };
-    }
-  }, [conversationId, socket]);
-
-  // ========== Set other user ==========
-  useEffect(() => {
-    if (!currentConversation?.participants || !appUserId) return;
-
-    const other = currentConversation.participants.find(
-      (p) => p.id !== appUserId,
-    );
-
-    setOtherUser(other || null);
-  }, [currentConversation, appUserId]);
-
-  // ========== Save current conversation ==========
-  useEffect(() => {
-    if (currentConversation?.id && currentConversation.id !== INVALID) {
+    if (
+      currentConversation?.id &&
+      currentConversation.id !== INVALID_CONVERSATION
+    ) {
       saveCurrentConversation(currentConversation);
     }
   }, [currentConversation]);
 
-  // ========== Socket: Join conversation room ==========
+  // Set the active conversation.
   useEffect(() => {
-    if (!socket || !isConnected || !conversationId) return;
-    if (conversationId === INVALID) return;
-    if (joinedRoomRef.current) return;
+    if (!socket || !conversationId || conversationId === INVALID_CONVERSATION) {
+      return;
+    }
+
+    setActiveConversation(socket, conversationId);
+
+    return () => {
+      setActiveConversation(socket, null);
+    };
+  }, [socket, conversationId]);
+
+  // Join the conversation room.
+  useEffect(() => {
+    if (
+      !socket ||
+      !isConnected ||
+      !conversationId ||
+      conversationId === INVALID_CONVERSATION
+    ) {
+      return;
+    }
 
     socket.emit("join_conversation", conversationId);
-    joinedRoomRef.current = true;
   }, [socket, isConnected, conversationId]);
 
-  // ========== Fetch messages ==========
+  // Fetch messages and restore cached messages.
   useEffect(() => {
-    if (!conversationId || conversationId === INVALID) {
+    if (!conversationId || conversationId === INVALID_CONVERSATION) {
       setLoading(false);
       return;
     }
 
-    const cached = loadCachedMessages(conversationId);
+    let cancelled = false;
 
-    if (cached.length) {
+    setLoading(true);
+
+    const cachedMessages =
+      loadMessagesForConversation(conversationId) || [];
+
+    if (cachedMessages.length > 0) {
       dispatch(
         setMessages({
           conversationId,
-          messages: cached,
+          messages: cachedMessages,
         }),
       );
     }
 
     const fetchMessages = async () => {
       try {
-
-
-        const res = await apiFetch<ApiMessagesResponse>(
+        const response = await apiFetch<ApiMessagesResponse>(
           `/conversations/${conversationId}/messages`,
         );
 
-        if (res.data.success) {
+        if (cancelled) return;
+
+        if (response.data.success) {
           dispatch(
             setMessages({
               conversationId,
-              messages: res.data.messages,
+              messages: response.data.messages,
             }),
           );
 
-          cacheMessages(
+          saveMessagesForConversation(
             conversationId,
-            res.data.messages,
+            response.data.messages,
           );
         }
-      } catch (e) {
-        // Handle error silently
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to fetch messages:", error);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchMessages();
+
+    return () => {
+      cancelled = true;
+    };
   }, [conversationId, dispatch]);
 
-  // ========== Send message ==========
-  const sendMessage = async () => {
-    if (!input.trim() || !conversationId) return;
-    if (conversationId === INVALID) return;
-
-    // Unique ID generated by the client for this logical message.
-    const clientMessageId = uuid();
-
-    const msg: Message = {
-      // Optimistic message temporarily uses clientMessageId as its ID.
-      id: clientMessageId,
-
-      // This ID remains attached after the server gives us the real DB ID.
-      clientMessageId,
-
-      conversationId,
-      senderId: appUserId || "",
-      content: input.trim(),
-      status: online ? "sending" : "pending",
-      isRead: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    // Immediately show the message optimistically.
-    dispatch(
-      appendMessage({
-        conversationId,
-        message: msg,
-      }),
-    );
-
-    setInput("");
-
-    // Scroll to bottom after sending
-    setTimeout(() => {
-      scrollToBottom();
-    }, 150);
-
-    // Keep existing offline behavior.
-    if (!online) return;
-
-    try {
-      const res = await apiFetch<SendMessageApiResponse>(
-        `/messages/${conversationId}`,
-        {
-          method: "POST",
-          body: JSON.stringify({
-            conversationId,
-            content: msg.content,
-            clientMessageId,
-          }),
-        },
-      );
-
-      if (res.data.success) {
-        // Replace the optimistic message with
-        // the real server/database message.
-        dispatch(
-          updateMessage({
-            conversationId,
-            clientMessageId,
-            message: res.data.message,
-          }),
-        );
-
-        // Update cached version too.
-        const cached = loadCachedMessages(conversationId);
-
-        cacheMessages(
-          conversationId,
-          cached.map((m) =>
-            m.clientMessageId === clientMessageId
-              ? res.data.message
-              : m,
-          ),
-        );
-      }
-    } catch (e) {
-      // Mark the optimistic message as failed.
-      dispatch(
-        updateMessage({
-          conversationId,
-          clientMessageId,
-          message: {
-            ...msg,
-            status: "failed",
-          },
-        }),
-      );
-    }
-  };
-
-  // ========== Scroll to bottom function ==========
+  // Scroll to the latest message.
   const scrollToBottom = useCallback(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({
-        behavior: "smooth",
-      });
+    bottomRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
 
-      setShowScrollButton(false);
-      isUserScrollingRef.current = false;
-    }
+    setShowScrollButton(false);
+    isUserScrollingRef.current = false;
   }, []);
 
-  // ========== Handle scroll events ==========
+  // Track user scrolling.
   const handleScroll = useCallback(() => {
     const container = messagesContainerRef.current;
 
     if (!container) return;
 
-    const {
-      scrollTop,
-      scrollHeight,
-      clientHeight,
-    } = container;
+    const { scrollTop, scrollHeight, clientHeight } = container;
 
     const isNearBottom =
       scrollHeight - scrollTop - clientHeight < 100;
 
-    if (isNearBottom) {
-      setShowScrollButton(false);
-      isUserScrollingRef.current = false;
-    } else {
-      setShowScrollButton(true);
-      isUserScrollingRef.current = true;
-    }
+    setShowScrollButton(!isNearBottom);
+    isUserScrollingRef.current = !isNearBottom;
   }, []);
 
-  // ========== Auto scroll to bottom on new messages ==========
+  // Automatically scroll when new messages arrive.
   useEffect(() => {
-    if (
-      !isUserScrollingRef.current &&
-      bottomRef.current
-    ) {
-      requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({
-          behavior: "instant",
-        });
+    if (isUserScrollingRef.current || !bottomRef.current) return;
+
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "instant",
+        block: "end",
       });
-    }
+    });
   }, [messages.length]);
 
-  // ========== Scroll to bottom when messages are first loaded ==========
+  // Scroll after initial message loading.
   useEffect(() => {
-    if (
-      !loading &&
-      messages.length > 0 &&
-      bottomRef.current
-    ) {
-      requestAnimationFrame(() => {
-        bottomRef.current?.scrollIntoView({
-          behavior: "instant",
-        });
+    if (loading || messages.length === 0) return;
+
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({
+        behavior: "instant",
+        block: "end",
       });
-    }
+    });
   }, [loading, messages.length]);
 
-  // ========== Clear on unmount ==========
+  // Send a message.
+  const sendMessage = async () => {
+    const content = input.trim();
+
+    if (
+      !content ||
+      !online ||
+      !conversationId ||
+      conversationId === INVALID_CONVERSATION
+    ) {
+      return;
+    }
+
+    const clientMessageId = uuid();
+    const now = new Date().toISOString();
+
+    const optimisticMessage: Message = {
+      id: clientMessageId,
+      clientMessageId,
+      conversationId,
+      senderId: appUserId || "",
+      content,
+      status: "sending",
+      isRead: false,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // Immediately update the UI.
+    dispatch(
+      appendMessage({
+        conversationId,
+        message: optimisticMessage,
+      }),
+    );
+
+    setInput("");
+
+    // Persist optimistic message.
+    const cachedMessages =
+      loadMessagesForConversation(conversationId) || [];
+
+    saveMessagesForConversation(conversationId, [
+      ...cachedMessages,
+      optimisticMessage,
+    ]);
+
+    requestAnimationFrame(scrollToBottom);
+
+    try {
+      const response = await apiFetch<SendMessageApiResponse>(
+        `/messages/${conversationId}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            conversationId,
+            content,
+            clientMessageId,
+          }),
+        },
+      );
+
+      if (!response.data.success) {
+        throw new Error("Message sending failed");
+      }
+
+      const serverMessage = response.data.message;
+
+      // Replace optimistic message with the server message.
+      dispatch(
+        updateMessage({
+          conversationId,
+          clientMessageId,
+          message: serverMessage,
+        }),
+      );
+
+      // Update cached message.
+      const latestCache =
+        loadMessagesForConversation(conversationId) || [];
+
+      saveMessagesForConversation(
+        conversationId,
+        latestCache.map((message) =>
+          message.clientMessageId === clientMessageId
+            ? serverMessage
+            : message,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to send message:", error);
+
+      // Mark optimistic message as failed.
+      const failedMessage: Message = {
+        ...optimisticMessage,
+        status: "failed",
+      };
+
+      dispatch(
+        updateMessage({
+          conversationId,
+          clientMessageId,
+          message: failedMessage,
+        }),
+      );
+
+      const latestCache =
+        loadMessagesForConversation(conversationId) || [];
+
+      saveMessagesForConversation(
+        conversationId,
+        latestCache.map((message) =>
+          message.clientMessageId === clientMessageId
+            ? failedMessage
+            : message,
+        ),
+      );
+    }
+  };
+
+  // Clear selected conversation on unmount.
   useEffect(() => {
     return () => {
       dispatch(clearCurrentConversation());
     };
   }, [dispatch]);
 
-  // ========== UI States ==========
+  // Loading state.
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#2a51ff] border-t-transparent"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#2a51ff] border-t-transparent" />
       </div>
     );
   }
 
-  if (!conversationId || conversationId === INVALID) {
+  // No conversation selected.
+  if (!conversationId || conversationId === INVALID_CONVERSATION) {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-500">
-          No conversation selected
-        </p>
+        <p className="text-gray-500">No conversation selected</p>
 
         <button
           onClick={() => navigate("/")}
@@ -409,6 +389,7 @@ const ChatLayout = () => {
 
   return (
     <section className="h-screen flex flex-col bg-home">
+      {/* Chat header */}
       <header className="bg-white px-4 py-3 shadow-xl flex items-center gap-2 border-b border-gray-200">
         <PhotoHolder
           username={otherUser?.username || "User"}
@@ -422,20 +403,9 @@ const ChatLayout = () => {
               "Loading..."}
           </h2>
         </div>
-
-        {/* <button
-          onClick={recover}
-          className={`p-2 rounded-full transition ${
-            recovered
-              ? "text-green-500 bg-green-50"
-              : "text-gray-500 hover:text-blue-500 hover:bg-blue-50"
-          }`}
-          title="Recover data from cache"
-        >
-          <Database size={18} />
-        </button> */}
       </header>
 
+      {/* Messages */}
       <main
         ref={messagesContainerRef}
         onScroll={handleScroll}
@@ -469,18 +439,18 @@ const ChatLayout = () => {
           </div>
         ) : (
           <>
-            {messages.map((msg) => (
+            {messages.map((message) => (
               <ChatMessage
-                key={msg.id}
+                key={message.id || message.clientMessageId}
                 username={
-                  msg.senderId === appUserId
+                  message.senderId === appUserId
                     ? "You"
                     : otherUser?.username || "User"
                 }
-                senderId={msg.senderId}
-                text={msg.content}
-                time={msg.createdAt}
-                status={msg.status}
+                senderId={message.senderId}
+                text={message.content}
+                time={message.createdAt}
+                status={message.status}
               />
             ))}
 
@@ -488,41 +458,43 @@ const ChatLayout = () => {
           </>
         )}
 
-        {/* Scroll to Bottom Button */}
+        {/* Scroll to bottom */}
         {showScrollButton && (
           <button
             onClick={scrollToBottom}
-            className="absolute bottom-4 right-4 p-3 bg-[#2a51ff] text-white rounded-full shadow-lg hover:bg-[#1a3fd9] transition-all transform hover:scale-110 active:scale-95 z-10"
             aria-label="Scroll to bottom"
+            className="absolute bottom-4 right-4 p-3 bg-[#2a51ff] text-white rounded-full shadow-lg hover:bg-[#1a3fd9] transition-all transform hover:scale-110 active:scale-95 z-10"
           >
             <ArrowDown size={20} />
           </button>
         )}
       </main>
 
+      {/* Message input */}
       <div className="flex items-center gap-2 px-3 py-2 bg-white border-t border-gray-200">
         <input
           type="text"
           value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              sendMessage();
+          onChange={(event) => setInput(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              void sendMessage();
             }
           }}
           placeholder={
             online
               ? "Type a message..."
-              : "You're offline. Message will send when online."
+              : "You're offline. Reconnect to send messages."
           }
           className="flex-1 h-10 px-4 rounded-full border border-gray-300 outline-none focus:ring-1 focus:ring-[#2a51ff] font-gfont disabled:bg-gray-100"
-          disabled={!online && !input.trim()}
         />
 
         <button
-          onClick={sendMessage}
-          disabled={!input.trim()}
+          onClick={() => void sendMessage()}
+          disabled={!input.trim() || !online}
           className="h-10 w-10 rounded-full flex items-center justify-center bg-[#2a51ff] text-white hover:bg-[#1a3fd9] transition disabled:opacity-50 disabled:cursor-not-allowed"
+          aria-label="Send message"
         >
           <Send size={18} />
         </button>
@@ -531,4 +503,4 @@ const ChatLayout = () => {
   );
 };
 
-export default ChatLayout;  
+export default ChatLayout;
