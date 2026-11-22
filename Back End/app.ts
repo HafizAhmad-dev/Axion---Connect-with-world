@@ -31,26 +31,25 @@ const baseURL = '/api/v1';
 // 💻 Fix 1: Robust CORS settings using the 'cors' package
 // This allows Postman (no origin) and matches your frontend URL dynamically in production
 const allowedOrigins = [
-  'http://localhost:5173', 
-  'http://192.168.38:5173',
-  process.env.FRONTEND_URL // Highly recommended: Add your production frontend URL to Railway Env Variables
-];
+  process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
+].filter((origin): origin is string => Boolean(origin));
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like Postman, mobile apps, curl)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // In production, you can lock this down tighter, but this prevents 502 proxy errors during debugging
-      callback(null, true); 
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  origin: allowedOrigins,
+  methods: [
+    "GET",
+    "POST",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+  ],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
+  credentials: true,
 }));
 
 // Routes

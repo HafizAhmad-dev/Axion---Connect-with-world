@@ -80,7 +80,9 @@ const Home = () => {
 
   // ========== Format time ==========
   const formatMessageTime = (dateString: string): string => {
+
     const date = new Date(dateString);
+    console.log(dateString, date)
     const now = new Date();
     const diffDays = Math.floor(
       (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
